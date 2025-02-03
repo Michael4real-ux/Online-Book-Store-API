@@ -22,6 +22,7 @@ public class Book {
     private String genre;
 
     @NotBlank
+    @Column(unique = true, nullable = false)
     @Pattern(regexp = "^[0-9-]+$", message = "ISBN must contain only numbers and dashes")
     private String isbn;
 

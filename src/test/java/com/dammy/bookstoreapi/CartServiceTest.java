@@ -3,6 +3,7 @@ package com.dammy.bookstoreapi;
 import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.model.ShoppingCart;
 import com.dammy.bookstoreapi.repository.CartRepository;
+import com.dammy.bookstoreapi.repository.BookRepository;
 import com.dammy.bookstoreapi.service.CartService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +25,9 @@ public class CartServiceTest {
 
     @Mock
     private CartRepository cartRepository;
+
+    @Mock
+    private BookRepository bookRepository;
 
     @BeforeEach
     public void init() {
@@ -42,37 +47,59 @@ public class CartServiceTest {
     @Test
     public void testAddBookToCart() {
         Long cartId = 1L;
+        Long bookId = 2L;
         ShoppingCart cart = new ShoppingCart();
         cart.setId(cartId);
+        cart.setBooks(new ArrayList<>()); // Ensure books list is initialized
+
         Book book = new Book();
+        book.setId(bookId);
         book.setTitle("Book 1");
 
-        ShoppingCart updatedCart = new ShoppingCart();
-        updatedCart.setId(cartId);
-        updatedCart.getBooks().add(book);
-
         when(cartRepository.findById(cartId)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any(ShoppingCart.class))).thenReturn(updatedCart);
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(cartRepository.save(any(ShoppingCart.class))).thenReturn(cart);
 
-        ShoppingCart result = cartService.addBookToCart(cartId, book);
+        ShoppingCart result = cartService.addBookToCart(cartId, bookId);
+
         assertNotNull(result);
         assertEquals(cartId, result.getId());
         assertEquals(1, result.getBooks().size());
         assertEquals("Book 1", result.getBooks().get(0).getTitle());
+
         verify(cartRepository, times(1)).findById(cartId);
+        verify(bookRepository, times(1)).findById(bookId);
         verify(cartRepository, times(1)).save(any(ShoppingCart.class));
     }
 
     @Test
     public void testAddBookToCart_CartNotFound() {
         Long cartId = 1L;
-        Book book = new Book();
-        book.setTitle("Book 1");
+        Long bookId = 2L;
 
         when(cartRepository.findById(cartId)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> cartService.addBookToCart(cartId, book));
+        assertThrows(RuntimeException.class, () -> cartService.addBookToCart(cartId, bookId));
+
         verify(cartRepository, times(1)).findById(cartId);
+        verify(bookRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    public void testAddBookToCart_BookNotFound() {
+        Long cartId = 1L;
+        Long bookId = 2L;
+        ShoppingCart cart = new ShoppingCart();
+        cart.setId(cartId);
+        cart.setBooks(new ArrayList<>());
+
+        when(cartRepository.findById(cartId)).thenReturn(Optional.of(cart));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> cartService.addBookToCart(cartId, bookId));
+
+        verify(cartRepository, times(1)).findById(cartId);
+        verify(bookRepository, times(1)).findById(bookId);
     }
 
     @Test
@@ -83,9 +110,10 @@ public class CartServiceTest {
 
         when(cartRepository.findById(cartId)).thenReturn(Optional.of(cart));
 
-        Optional<ShoppingCart> foundCart = cartService.getCart(cartId);
-        assertTrue(foundCart.isPresent());
-        assertEquals(cartId, foundCart.get().getId());
+        ShoppingCart foundCart = cartService.getCart(cartId);
+        assertNotNull(foundCart);
+        assertEquals(cartId, foundCart.getId());
+
         verify(cartRepository, times(1)).findById(cartId);
     }
 
@@ -95,8 +123,10 @@ public class CartServiceTest {
 
         when(cartRepository.findById(cartId)).thenReturn(Optional.empty());
 
-        Optional<ShoppingCart> foundCart = cartService.getCart(cartId);
-        assertFalse(foundCart.isPresent());
+        ShoppingCart foundCart = cartService.getCart(cartId);
+        assertNotNull(foundCart); // Now returns a new empty cart instead of Optional.empty()
+        assertEquals(0, foundCart.getBooks().size()); // Ensure it's an empty cart
+
         verify(cartRepository, times(1)).findById(cartId);
     }
 }

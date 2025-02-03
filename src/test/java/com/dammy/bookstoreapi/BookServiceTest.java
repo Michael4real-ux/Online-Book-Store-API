@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,5 +123,102 @@ public class BookServiceTest {
 		});
 
 		assertEquals("Database error", exception.getMessage());
+	}
+
+	@Test
+	public void testSearchBooksByTitle() {
+		Book book = new Book();
+		book.setTitle("Book 1");
+		book.setAuthor("Author 1");
+
+		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
+
+		List<Book> result = bookService.searchBooks("Book 1", null, null, null);
+		assertEquals(1, result.size());
+		assertEquals("Book 1", result.get(0).getTitle());
+	}
+
+	@Test
+	public void testSearchBooksByAuthor() {
+		Book book = new Book();
+		book.setTitle("Book 1");
+		book.setAuthor("Author 1");
+
+		when(bookRepository.findByAuthorContainingIgnoreCase("Author 1")).thenReturn(List.of(book));
+
+		List<Book> result = bookService.searchBooks(null, "Author 1", null, null);
+		assertEquals(1, result.size());
+		assertEquals("Author 1", result.get(0).getAuthor());
+	}
+
+	@Test
+	public void testSearchBooksByYear() {
+		Book book = new Book();
+		book.setTitle("Book 1");
+		book.setAuthor("Author 1");
+		book.setPublicationYear(2022);
+
+		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
+
+		List<Book> result = bookService.searchBooks(null, null, 2022, null);
+		assertEquals(1, result.size());
+		assertEquals(2022, (long) result.get(0).getPublicationYear());
+	}
+
+	@Test
+	public void testSearchBooksByGenre() {
+		Book book = new Book();
+		book.setTitle("Book 1");
+		book.setAuthor("Author 1");
+		book.setGenre("Fiction");
+
+		when(bookRepository.findByGenreContainingIgnoreCase("Fiction")).thenReturn(List.of(book));
+
+		List<Book> result = bookService.searchBooks(null, null, null, "Fiction");
+		assertEquals(1, result.size());
+		assertEquals("Fiction", result.get(0).getGenre());
+	}
+
+	@Test
+	public void testSearchBooksByMultipleCriteria() {
+		Book book = new Book();
+		book.setTitle("Book 1");
+		book.setAuthor("Author 1");
+		book.setPublicationYear(2022);
+		book.setGenre("Fiction");
+
+		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
+		when(bookRepository.findByAuthorContainingIgnoreCase("Author 1")).thenReturn(List.of(book));
+		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
+		when(bookRepository.findByGenreContainingIgnoreCase("Fiction")).thenReturn(List.of(book));
+
+		List<Book> result = bookService.searchBooks("Book 1", "Author 1", 2022, "Fiction");
+		assertEquals(1, result.size());
+		assertEquals("Book 1", result.get(0).getTitle());
+		assertEquals("Author 1", result.get(0).getAuthor());
+		assertEquals(2022, (long) result.get(0).getPublicationYear());
+		assertEquals("Fiction", result.get(0).getGenre());
+	}
+
+	@Test
+	public void testSearchBooksNoResults() {
+		when(bookRepository.findByTitleContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
+		when(bookRepository.findByAuthorContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
+		when(bookRepository.findByPublicationYear(anyInt())).thenReturn(new ArrayList<>());
+		when(bookRepository.findByGenreContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
+
+		List<Book> result = bookService.searchBooks("Non-existent book", "Non-existent author", 2022, "Non-existent genre");
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	public void testSearchBooksRepositoryException() {
+		when(bookRepository.findByTitleContainingIgnoreCase(anyString())).thenThrow(new RuntimeException("Repository error"));
+
+		Exception exception = assertThrows(RuntimeException.class, () -> {
+			bookService.searchBooks("Book 1", null, null, null);
+		});
+
+		assertEquals("Repository error", exception.getMessage());
 	}
 }

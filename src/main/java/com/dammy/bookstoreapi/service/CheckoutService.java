@@ -15,6 +15,9 @@ public class CheckoutService {
     private PurchaseRepository purchaseRepository;
 
     public Purchase checkout(ShoppingCart shoppingCart) {
+        if (shoppingCart == null) {
+            throw new NullPointerException("Shopping cart cannot be null");
+        }
         Purchase purchase = new Purchase();
         purchase.setShoppingCart(shoppingCart);
         purchase.setPurchaseDate(new Date());

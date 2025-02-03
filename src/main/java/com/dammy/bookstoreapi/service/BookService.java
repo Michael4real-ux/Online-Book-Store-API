@@ -4,6 +4,7 @@ import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,5 +33,25 @@ public class BookService {
 
     public Optional<Book> findById(Long id) {
         return bookRepository.findById(id);
+    }
+
+    public List<Book> searchBooks(String title, String author, Integer year, String genre) {
+        List<Book> result = new ArrayList<>();
+
+        if (title != null && !title.isEmpty()) {
+            result.addAll(bookRepository.findByTitleContainingIgnoreCase(title));
+        }
+        if (author != null && !author.isEmpty()) {
+            result.addAll(bookRepository.findByAuthorContainingIgnoreCase(author));
+        }
+        if (year != null) {
+            result.addAll(bookRepository.findByPublicationYear(year));
+        }
+        if (genre != null && !genre.isEmpty()) {
+            result.addAll(bookRepository.findByGenreContainingIgnoreCase(genre));
+        }
+
+        // Return distinct books
+        return result.stream().distinct().toList();
     }
 }

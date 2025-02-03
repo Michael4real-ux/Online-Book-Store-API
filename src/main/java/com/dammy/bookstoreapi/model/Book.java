@@ -1,15 +1,13 @@
 package com.dammy.bookstoreapi.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 @Entity
+@Table(name = "book")
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +28,13 @@ public class Book {
     @NotBlank
     private String author;
 
-    @Min(1450) // Assuming the earliest book publication year
-    @Max(2025) // Assuming the current year
-    private int yearOfPublication;
+    @Min(1450)  // Assuming Range from year 1450 to current year 2025
+    @Max(2025)
+    @Column(name = "publication_year")
+    private int publicationYear;
+
+    @ManyToOne
+    private ShoppingCart shoppingCart;
 
     // Getters and Setters
 
@@ -76,11 +78,11 @@ public class Book {
         this.author = author;
     }
 
-    public int getYearOfPublication() {
-        return yearOfPublication;
+    public int getPublicationYear() {
+        return publicationYear;
     }
 
-    public void setYearOfPublication(int yearOfPublication) {
-        this.yearOfPublication = yearOfPublication;
+    public void setPublicationYear(int publicationYear) {
+        this.publicationYear = publicationYear;
     }
 }

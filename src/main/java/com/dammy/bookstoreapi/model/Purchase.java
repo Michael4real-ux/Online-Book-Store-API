@@ -1,9 +1,13 @@
 package com.dammy.bookstoreapi.model;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
+@Table(name = "purchase")
 public class Purchase {
 
     @Id
@@ -14,6 +18,7 @@ public class Purchase {
     private Date purchaseDate;
 
     @ManyToOne
+    @JoinColumn(name = "shopping_cart_id")
     private ShoppingCart shoppingCart;
 
     // Getters and Setters

@@ -16,7 +16,7 @@ public class CheckoutService {
 
     public Purchase checkout(ShoppingCart shoppingCart) {
         Purchase purchase = new Purchase();
-        purchase.setShoppingCart(shoppingCart); // Use setShoppingCart here
+        purchase.setShoppingCart(shoppingCart);
         purchase.setPurchaseDate(new Date());
         return purchaseRepository.save(purchase);
     }

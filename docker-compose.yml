@@ -8,7 +8,6 @@ services:
       - redis
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore_db
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_DATASOURCE_USERNAME: bookstore_user
       SPRING_DATASOURCE_PASSWORD: bookstore_password
 
@@ -22,6 +21,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    command: redis-server --requirepass redis_password
 
   postgres:
     image: postgres:latest

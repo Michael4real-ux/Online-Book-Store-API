@@ -48,33 +48,41 @@ public class CartServiceTest {
     public void testAddBookToCart() {
         Long cartId = 1L;
         Long bookId = 2L;
+
+        // Create cart and initialize books set
         ShoppingCart cart = new ShoppingCart();
         cart.setId(cartId);
-        cart.setBooks(new HashSet<>()); // Use HashSet instead of ArrayList
+        cart.setBooks(new HashSet<>()); // Use HashSet to store books
 
+        // Create a new Book object
         Book book = new Book();
         book.setId(bookId);
         book.setTitle("Book 1");
 
+        // Mock repository calls
         when(cartRepository.findById(cartId)).thenReturn(Optional.of(cart));
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
         when(cartRepository.save(any(ShoppingCart.class))).thenReturn(cart);
 
+        // Perform the action
         ShoppingCart result = cartService.addBookToCart(cartId, bookId);
 
-        assertNotNull(result);
-        assertEquals(cartId, result.getId());
-        assertEquals(1, result.getBooks().size());
+        // Assertions
+        assertNotNull(result, "The result cart should not be null");
+        assertEquals(cartId, result.getId(), "The cart ID should match");
+        assertEquals(1, result.getBooks().size(), "The cart should have one book");
 
-        // Retrieve book from Set properly
+        // Retrieve the added book from the Set
         Book addedBook = result.getBooks().stream().findFirst().orElse(null);
-        assertNotNull(addedBook);
-        assertEquals("Book 1", addedBook.getTitle());
+        assertNotNull(addedBook, "The added book should not be null");
+        assertEquals("Book 1", addedBook.getTitle(), "The added book title should match");
 
+        // Verify interactions with the repositories
         verify(cartRepository, times(1)).findById(cartId);
         verify(bookRepository, times(1)).findById(bookId);
         verify(cartRepository, times(1)).save(any(ShoppingCart.class));
     }
+
 
     @Test
     public void testAddBookToCart_CartNotFound() {

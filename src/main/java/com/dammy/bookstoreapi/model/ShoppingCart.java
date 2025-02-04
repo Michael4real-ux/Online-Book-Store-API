@@ -19,6 +19,10 @@ public class ShoppingCart {
     )
     private Set<Book> books = new HashSet<>();
 
+    public ShoppingCart() {
+        this.books = new HashSet<>();
+    }
+
     public Long getId() {
         return id;
     }
@@ -35,7 +39,12 @@ public class ShoppingCart {
         this.books = books;
     }
 
+
     public void addBook(Book book) {
         this.books.add(book);
+    }
+
+    public void removeBook(Long bookId) {
+        this.books.removeIf(book -> book.getId().equals(bookId));
     }
 }

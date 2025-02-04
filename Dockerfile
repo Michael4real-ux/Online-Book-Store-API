@@ -6,5 +6,5 @@ RUN mvn clean package -DskipTests
 
 # Use the official OpenJDK image to run the application
 FROM openjdk:17-jdk-slim
-COPY --from=builder /app/target/bookstore-api-0.0.1-SNAPSHOT.jar bookstore-api.jar
+COPY --from=builder /app/target/*.jar bookstore-api.jar
 ENTRYPOINT ["java", "-jar", "/bookstore-api.jar"]

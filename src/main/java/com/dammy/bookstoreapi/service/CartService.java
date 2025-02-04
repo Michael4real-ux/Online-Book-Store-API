@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Map;
+
 @Service
 public class CartService {
 
@@ -14,7 +17,7 @@ public class CartService {
     private BookRepository bookRepository;
 
     @Autowired
-    private RedisTemplate<String, ShoppingCart> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     // Create a new shopping cart
     public ShoppingCart createCart() {
@@ -26,37 +29,32 @@ public class CartService {
 
     // Add a book to the cart
     public ShoppingCart addBookToCart(Long cartId, Long bookId) {
-        ShoppingCart cart = redisTemplate.opsForValue().get("cart:" + cartId);
-        if (cart == null) {
-            throw new RuntimeException("Cart not found");
-        }
+        String cartKey = "cart:" + cartId;
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+        // Store bookId as a field in the Redis Hash
+        redisTemplate.opsForHash().put(cartKey, bookId.toString(), book); // Use bookId as field and Book object as value
 
-        cart.addBook(book);
-        redisTemplate.opsForValue().set("cart:" + cartId, cart);
+        ShoppingCart cart = getCart(cartId); // Update the cart object
         return cart;
     }
 
+
     // Remove a book from the cart
     public ShoppingCart removeBookFromCart(Long cartId, Long bookId) {
-        ShoppingCart cart = redisTemplate.opsForValue().get("cart:" + cartId);
-        if (cart == null) {
-            throw new RuntimeException("Cart not found");
-        }
-
-        cart.removeBook(bookId);
-        redisTemplate.opsForValue().set("cart:" + cartId, cart);
-        return cart;
+        String cartKey = "cart:" + cartId;
+        redisTemplate.opsForHash().delete(cartKey, bookId.toString()); // Remove the book entry from the Hash
+        return getCart(cartId); // Update and return the cart
     }
 
     // Get the contents of the cart
     public ShoppingCart getCart(Long cartId) {
-        ShoppingCart cart = redisTemplate.opsForValue().get("cart:" + cartId);
-        if (cart == null) {
-            throw new RuntimeException("Cart not found");
-        }
+        String cartKey = "cart:" + cartId;
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(cartKey);
+        ShoppingCart cart = new ShoppingCart();
+        cart.setId(cartId);
+        Collection<Object> books = entries.values();
+        books.forEach(book -> cart.addBook((Book) book));
         return cart;
     }
 

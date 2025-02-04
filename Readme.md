@@ -116,7 +116,61 @@ CheckoutController: Offers endpoints for processing checkouts.
 
 High-Level Architecture Diagram
 
-[High-Level-Design.md](../High-Level-Design/High-Level-Design.md)
+```
++-------------------+            +---------------------+
+|   HTTP Requests    |  <------> |   BookController    |
++-------------------+            +---------------------+
+                                         |
+                                         | 
+                                         v
+                                +---------------------+
+                                |    BookService      |
+                                +---------------------+
+                                         |
+                                         |
+                                         v
+                                +---------------------+
+                                |   BookRepository    |
+                                +---------------------+
+                                         |
+                                         |
+                                         v
+                                  +-------------+
+                                  |   Database  |
+                                  +-------------+
+
++-------------------+            +---------------------+
+|   HTTP Requests    |  <------> |   CartController    |
++-------------------+            +---------------------+
+                                         |
+                                         |
+                                         v
+                                +---------------------+
+                                |    CartService      |
+                                +---------------------+
+                                         |
+                                         |
+                                         v
+                                +---------------------+
+                                |   CartRepository    |
+                                +---------------------+
+
++-------------------+            +---------------------+
+|   HTTP Requests    |  <------> |  CheckoutController  |
++-------------------+            +---------------------+
+                                         |
+                                         |
+                                         v
+                                +---------------------+
+                                |  CheckoutService    |
+                                +---------------------+
+                                         |
+                                         |
+                                         v
+                                +---------------------+
+                                |   PurchaseRepository |
+                                +---------------------+
+```
 
 Explanation of the Diagram
 

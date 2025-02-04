@@ -1,7 +1,10 @@
 package com.dammy.bookstoreapi.repository;
 
 import com.dammy.bookstoreapi.model.Book;
+import com.dammy.bookstoreapi.model.User;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,9 +13,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByTitleContainingIgnoreCase(String title);
 
-    List<Book> findByAuthorContainingIgnoreCase(String author);
-
     List<Book> findByPublicationYear(Integer publicationYear);
 
     List<Book> findByGenreContainingIgnoreCase(String genre);
+
+    @Query("SELECT b FROM Book b WHERE LOWER(b.author.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Book> findByAuthorName(@Param("name") String name);
+
 }

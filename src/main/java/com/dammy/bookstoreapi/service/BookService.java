@@ -41,12 +41,15 @@ public class BookService {
         if (title != null && !title.isEmpty()) {
             result.addAll(bookRepository.findByTitleContainingIgnoreCase(title));
         }
+
         if (author != null && !author.isEmpty()) {
-            result.addAll(bookRepository.findByAuthorContainingIgnoreCase(author));
+            result.addAll(bookRepository.findByAuthorName(author));
         }
+
         if (year != null) {
             result.addAll(bookRepository.findByPublicationYear(year));
         }
+
         if (genre != null && !genre.isEmpty()) {
             result.addAll(bookRepository.findByGenreContainingIgnoreCase(genre));
         }
@@ -54,4 +57,5 @@ public class BookService {
         // Return distinct books
         return result.stream().distinct().toList();
     }
+
 }

@@ -69,6 +69,13 @@ public class Book {
         this.isbn = isbn;
     }
 
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
+    }
 
     public int getPublicationYear() {
         return publicationYear;

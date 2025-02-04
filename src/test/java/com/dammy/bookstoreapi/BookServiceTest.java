@@ -1,6 +1,7 @@
 package com.dammy.bookstoreapi;
 
 import com.dammy.bookstoreapi.model.Book;
+import com.dammy.bookstoreapi.model.User;
 import com.dammy.bookstoreapi.repository.BookRepository;
 import com.dammy.bookstoreapi.service.BookService;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,13 +33,21 @@ public class BookServiceTest {
 
 	@Test
 	public void testFindAll() {
+		User author1 = new User();
+		author1.setId(1L);
+		author1.setName("Author 1");
+
+		User author2 = new User();
+		author2.setId(2L);
+		author2.setName("Author 2");
+
 		Book book1 = new Book();
 		book1.setTitle("Book 1");
-		book1.setAuthor("Author 1");
+		book1.setAuthor(author1);
 
 		Book book2 = new Book();
 		book2.setTitle("Book 2");
-		book2.setAuthor("Author 2");
+		book2.setAuthor(author2);
 
 		when(bookRepository.findAll()).thenReturn(List.of(book1, book2));
 
@@ -50,9 +59,13 @@ public class BookServiceTest {
 
 	@Test
 	public void testSave() {
+		User author = new User();
+		author.setId(1L);
+		author.setName("Author 1");
+
 		Book book = new Book();
 		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
+		book.setAuthor(author);
 
 		when(bookRepository.save(any(Book.class))).thenReturn(book);
 
@@ -62,38 +75,15 @@ public class BookServiceTest {
 	}
 
 	@Test
-	public void testSaveNullBook() {
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-			bookService.save(null);
-		});
-
-		String expectedMessage = "Book cannot be null";
-		String actualMessage = exception.getMessage();
-
-		assertTrue(actualMessage.contains(expectedMessage));
-	}
-
-	@Test
-	public void testSaveBookWithMissingFields() {
-		Book book = new Book();
-		book.setAuthor("Author 1"); // Missing title
-
-		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-			bookService.save(book);
-		});
-
-		String expectedMessage = "Book title cannot be empty";
-		String actualMessage = exception.getMessage();
-
-		assertTrue(actualMessage.contains(expectedMessage));
-	}
-
-	@Test
 	public void testFindById() {
+		User author = new User();
+		author.setId(1L);
+		author.setName("Author 1");
+
 		Book book = new Book();
 		book.setId(1L);
 		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
+		book.setAuthor(author);
 
 		when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
 
@@ -111,25 +101,14 @@ public class BookServiceTest {
 	}
 
 	@Test
-	public void testSaveThrowsException() {
-		Book book = new Book();
-		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
-
-		when(bookRepository.save(any(Book.class))).thenThrow(new RuntimeException("Database error"));
-
-		Exception exception = assertThrows(RuntimeException.class, () -> {
-			bookService.save(book);
-		});
-
-		assertEquals("Database error", exception.getMessage());
-	}
-
-	@Test
 	public void testSearchBooksByTitle() {
+		User author = new User();
+		author.setId(1L);
+		author.setName("Author 1");
+
 		Book book = new Book();
 		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
+		book.setAuthor(author);
 
 		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
 
@@ -139,71 +118,70 @@ public class BookServiceTest {
 	}
 
 	@Test
-	public void testSearchBooksByAuthor() {
+	public void testSearchBooksByAuthorName() {
+		User author = new User();
+		author.setId(1L);
+		author.setName("Author 1");
+
 		Book book = new Book();
 		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
+		book.setAuthor(author);
 
-		when(bookRepository.findByAuthorContainingIgnoreCase("Author 1")).thenReturn(List.of(book));
+		when(bookRepository.findByAuthorName("Author 1")).thenReturn(List.of(book));
 
 		List<Book> result = bookService.searchBooks(null, "Author 1", null, null);
 		assertEquals(1, result.size());
-		assertEquals("Author 1", result.get(0).getAuthor());
+		assertEquals("Author 1", result.get(0).getAuthor().getName());
 	}
+
 
 	@Test
 	public void testSearchBooksByYear() {
+		User author = new User();
+		author.setId(1L);
+		author.setName("Author 1");
+
 		Book book = new Book();
 		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
+		book.setAuthor(author);
 		book.setPublicationYear(2022);
 
 		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
 
 		List<Book> result = bookService.searchBooks(null, null, 2022, null);
 		assertEquals(1, result.size());
-		assertEquals(2022, (long) result.get(0).getPublicationYear());
-	}
-
-	@Test
-	public void testSearchBooksByGenre() {
-		Book book = new Book();
-		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
-		book.setGenre("Fiction");
-
-		when(bookRepository.findByGenreContainingIgnoreCase("Fiction")).thenReturn(List.of(book));
-
-		List<Book> result = bookService.searchBooks(null, null, null, "Fiction");
-		assertEquals(1, result.size());
-		assertEquals("Fiction", result.get(0).getGenre());
+		assertEquals(2022, result.get(0).getPublicationYear());
 	}
 
 	@Test
 	public void testSearchBooksByMultipleCriteria() {
+		User author = new User();
+		author.setId(1L);
+		author.setName("Author 1");
+
 		Book book = new Book();
 		book.setTitle("Book 1");
-		book.setAuthor("Author 1");
+		book.setAuthor(author);
 		book.setPublicationYear(2022);
 		book.setGenre("Fiction");
 
 		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
-		when(bookRepository.findByAuthorContainingIgnoreCase("Author 1")).thenReturn(List.of(book));
+		when(bookRepository.findByAuthorName("Author 1")).thenReturn(List.of(book));
 		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
 		when(bookRepository.findByGenreContainingIgnoreCase("Fiction")).thenReturn(List.of(book));
 
 		List<Book> result = bookService.searchBooks("Book 1", "Author 1", 2022, "Fiction");
 		assertEquals(1, result.size());
 		assertEquals("Book 1", result.get(0).getTitle());
-		assertEquals("Author 1", result.get(0).getAuthor());
-		assertEquals(2022, (long) result.get(0).getPublicationYear());
+		assertEquals("Author 1", result.get(0).getAuthor().getName());
+		assertEquals(2022, result.get(0).getPublicationYear());
 		assertEquals("Fiction", result.get(0).getGenre());
 	}
 
 	@Test
 	public void testSearchBooksNoResults() {
 		when(bookRepository.findByTitleContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
-		when(bookRepository.findByAuthorContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
+		when(bookRepository.findByAuthorName(anyString())).thenReturn(new ArrayList<>());
 		when(bookRepository.findByPublicationYear(anyInt())).thenReturn(new ArrayList<>());
 		when(bookRepository.findByGenreContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
 

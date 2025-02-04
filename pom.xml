@@ -66,6 +66,13 @@
 			<version>3.1.0</version>
 		</dependency>
 
+		<!-- Spring Boot Web Security Dependency -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<!-- Other dependencies... -->
+
 	</dependencies>
 
 	<build>

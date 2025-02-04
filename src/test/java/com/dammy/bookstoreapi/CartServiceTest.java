@@ -50,25 +50,27 @@ public class CartServiceTest {
     public void testCreateCart() {
         ShoppingCart cart = cartService.createCart();
         assertNotNull(cart);
+
         verify(valueOperations, times(1)).set(anyString(), any(ShoppingCart.class));
     }
 
     @Test
     public void testAddBookToCart() {
-        Long cartId = 1L;
+        String cartId = "1";
         Long bookId = 2L;
 
         Book book = new Book();
         book.setId(bookId);
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(redisTemplate.hasKey("cart:" + cartId)).thenReturn(true);
 
         Map<Object, Object> entries = new HashMap<>();
         entries.put(bookId.toString(), book);
 
         when(hashOperations.entries("cart:" + cartId)).thenReturn(entries);
 
-        ShoppingCart resultCart = cartService.addBookToCart(cartId, bookId);
+        ShoppingCart resultCart = cartService.addBookToCart(Long.parseLong(cartId), bookId);
 
         assertNotNull(resultCart);
         assertEquals(cartId, resultCart.getId());
@@ -79,12 +81,14 @@ public class CartServiceTest {
 
     @Test
     public void testAddBookToCart_BookNotFound() {
-        Long cartId = 1L;
+        String cartId = "1";
         Long bookId = 2L;
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
+        when(redisTemplate.hasKey("cart:" + cartId)).thenReturn(true);
 
-        assertThrows(RuntimeException.class, () -> cartService.addBookToCart(cartId, bookId));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> cartService.addBookToCart(Long.parseLong(cartId), bookId));
+        assertEquals("Book not found", exception.getMessage());
 
         verify(bookRepository, times(1)).findById(bookId);
         verify(hashOperations, never()).put(anyString(), anyString(), any());
@@ -92,7 +96,7 @@ public class CartServiceTest {
 
     @Test
     public void testGetCart() {
-        Long cartId = 1L;
+        String cartId = "1";
 
         Map<Object, Object> entries = new HashMap<>();
         Book book = new Book();
@@ -100,7 +104,7 @@ public class CartServiceTest {
         entries.put("book:1", book);
         when(hashOperations.entries("cart:" + cartId)).thenReturn(entries);
 
-        ShoppingCart cart = cartService.getCart(cartId);
+        ShoppingCart cart = cartService.getCart(Long.parseLong(cartId));
 
         assertNotNull(cart);
         assertEquals(cartId, cart.getId());

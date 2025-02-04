@@ -1,13 +1,15 @@
 package com.dammy.bookstoreapi.model;
 
 
+import org.springframework.data.redis.core.RedisHash;
+
 import java.util.HashSet;
 import java.util.Set;
 
-
+@RedisHash("cart")
 public class ShoppingCart {
 
-    private Long id;
+    private String id;
 
     private Set<Book> books = new HashSet<>();
 
@@ -15,11 +17,11 @@ public class ShoppingCart {
         this.books = new HashSet<>();
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

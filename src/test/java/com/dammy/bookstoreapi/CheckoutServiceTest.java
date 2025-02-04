@@ -35,7 +35,7 @@ public class CheckoutServiceTest {
     public void testCheckout() {
         // Arrange
         ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setId(1L);
+        shoppingCart.setId("1L");
         shoppingCart.addBook(new Book());
 
         PaymentMethod paymentMethod = PaymentMethod.WEB;
@@ -81,7 +81,7 @@ public class CheckoutServiceTest {
     public void testCheckout_NullPaymentMethod() {
         // Arrange
         ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setId(1L);
+        shoppingCart.setId("1L");
         shoppingCart.addBook(new Book());
 
         // Act & Assert
@@ -94,7 +94,7 @@ public class CheckoutServiceTest {
     public void testCheckout_PurchaseRepositorySaveFailure() {
         // Arrange
         ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setId(1L);
+        shoppingCart.setId("1L");
         shoppingCart.addBook(new Book());
 
         PaymentMethod paymentMethod = PaymentMethod.WEB;

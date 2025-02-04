@@ -26,16 +26,14 @@ public class Book {
     @Pattern(regexp = "^[0-9-]+$", message = "ISBN must contain only numbers and dashes")
     private String isbn;
 
-    @NotBlank
-    private String author;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
     @Min(1450)  // Assuming Range from year 1450 to current year 2025
     @Max(2025)
     @Column(name = "publication_year")
     private int publicationYear;
-
-    @ManyToOne
-    private ShoppingCart shoppingCart;
 
     // Getters and Setters
 
@@ -71,13 +69,6 @@ public class Book {
         this.isbn = isbn;
     }
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
 
     public int getPublicationYear() {
         return publicationYear;

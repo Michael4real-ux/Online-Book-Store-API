@@ -1,6 +1,5 @@
 package com.dammy.bookstoreapi.service;
 
-import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.model.PaymentMethod;
 import com.dammy.bookstoreapi.model.Purchase;
 import com.dammy.bookstoreapi.model.ShoppingCart;
@@ -25,7 +24,7 @@ public class CheckoutService {
             throw new IllegalArgumentException("Payment method is required");
         }
         Purchase purchase = new Purchase();
-        purchase.setShoppingCart(shoppingCart);
+        purchase.setCartId(shoppingCart.getId().toString());
         purchase.setPurchaseDate(new Date());
         purchase.setPaymentMethod(paymentMethod);
         return purchaseRepository.save(purchase);
@@ -34,6 +33,4 @@ public class CheckoutService {
     public List<Purchase> history(){
         return purchaseRepository.findAll();
     }
-
-
 }

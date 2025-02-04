@@ -35,20 +35,12 @@ public class CartService {
         // Store bookId as a field in the Redis Hash
         redisTemplate.opsForHash().put(cartKey, bookId.toString(), book); // Use bookId as field and Book object as value
 
-        ShoppingCart cart = getCart(cartId); // Update the cart object
-        return cart;
+        return getCartFromRedis(cartId); // Return the updated cart
     }
 
 
-    // Remove a book from the cart
-    public ShoppingCart removeBookFromCart(Long cartId, Long bookId) {
-        String cartKey = "cart:" + cartId;
-        redisTemplate.opsForHash().delete(cartKey, bookId.toString()); // Remove the book entry from the Hash
-        return getCart(cartId); // Update and return the cart
-    }
-
-    // Get the contents of the cart
-    public ShoppingCart getCart(Long cartId) {
+    // Get cart from Redis
+    private ShoppingCart getCartFromRedis(Long cartId) {
         String cartKey = "cart:" + cartId;
         Map<Object, Object> entries = redisTemplate.opsForHash().entries(cartKey);
         ShoppingCart cart = new ShoppingCart();
@@ -57,6 +49,21 @@ public class CartService {
         books.forEach(book -> cart.addBook((Book) book));
         return cart;
     }
+
+
+    // Remove a book from the cart
+    public ShoppingCart removeBookFromCart(Long cartId, Long bookId) {
+        String cartKey = "cart:" + cartId;
+        redisTemplate.opsForHash().delete(cartKey, bookId.toString()); // Remove the book entry from the Hash
+        return getCartFromRedis(cartId); // Update and return the cart
+    }
+
+
+    // Get the contents of the cart
+    public ShoppingCart getCart(Long cartId) {
+        return getCartFromRedis(cartId);
+    }
+
 
     // Clear the cart
     public void clearCart(Long cartId) {

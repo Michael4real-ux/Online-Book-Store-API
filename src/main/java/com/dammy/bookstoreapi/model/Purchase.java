@@ -12,9 +12,7 @@ public class Purchase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "cart_id")
-    private ShoppingCart shoppingCart;
+    private String cartId;
 
     private Date purchaseDate;
 
@@ -39,12 +37,12 @@ public class Purchase {
         this.purchaseDate = purchaseDate;
     }
 
-    public ShoppingCart getShoppingCart() {
-        return shoppingCart;
+    public String getCartId() {
+        return cartId;
     }
 
-    public void setShoppingCart(ShoppingCart shoppingCart) {
-        this.shoppingCart = shoppingCart;
+    public void setCartId(String cartId) {
+        this.cartId = cartId;
     }
 
     public PaymentMethod getPaymentMethod() {

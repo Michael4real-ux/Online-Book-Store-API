@@ -36,12 +36,12 @@ public class CheckoutServiceTest {
         // Arrange
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setId(1L);
-        shoppingCart.addBook(new Book());  // Assuming Book class exists and has addBook method
+        shoppingCart.addBook(new Book());
 
         PaymentMethod paymentMethod = PaymentMethod.WEB;
 
         Purchase purchase = new Purchase();
-        purchase.setShoppingCart(shoppingCart);
+        purchase.setCartId(String.valueOf(shoppingCart.getId()));
         purchase.setPurchaseDate(new Date());
         purchase.setPaymentMethod(paymentMethod);
 
@@ -52,7 +52,7 @@ public class CheckoutServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(shoppingCart, result.getShoppingCart());
+        assertEquals(String.valueOf(shoppingCart.getId()), result.getCartId());
         assertNotNull(result.getPurchaseDate());
         assertEquals(paymentMethod, result.getPaymentMethod());
         verify(purchaseRepository, times(1)).save(any(Purchase.class));

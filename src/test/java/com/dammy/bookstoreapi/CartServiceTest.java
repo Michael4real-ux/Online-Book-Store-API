@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +50,7 @@ public class CartServiceTest {
         Long bookId = 2L;
         ShoppingCart cart = new ShoppingCart();
         cart.setId(cartId);
-        cart.setBooks(new ArrayList<>()); // Ensure books list is initialized
+        cart.setBooks(new HashSet<>()); // Use HashSet instead of ArrayList
 
         Book book = new Book();
         book.setId(bookId);
@@ -65,7 +65,11 @@ public class CartServiceTest {
         assertNotNull(result);
         assertEquals(cartId, result.getId());
         assertEquals(1, result.getBooks().size());
-        assertEquals("Book 1", result.getBooks().get(0).getTitle());
+
+        // Retrieve book from Set properly
+        Book addedBook = result.getBooks().stream().findFirst().orElse(null);
+        assertNotNull(addedBook);
+        assertEquals("Book 1", addedBook.getTitle());
 
         verify(cartRepository, times(1)).findById(cartId);
         verify(bookRepository, times(1)).findById(bookId);
@@ -91,7 +95,7 @@ public class CartServiceTest {
         Long bookId = 2L;
         ShoppingCart cart = new ShoppingCart();
         cart.setId(cartId);
-        cart.setBooks(new ArrayList<>());
+        cart.setBooks(new HashSet<>());
 
         when(cartRepository.findById(cartId)).thenReturn(Optional.of(cart));
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());

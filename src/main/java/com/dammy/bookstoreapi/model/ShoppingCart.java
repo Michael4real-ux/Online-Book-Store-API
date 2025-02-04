@@ -1,25 +1,23 @@
 package com.dammy.bookstoreapi.model;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "shoppingcart")
+@Table(name = "shopping_cart")
 public class ShoppingCart {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "shoppingCart")
-    private List<Purchase> purchases = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "shopping_cart_id")
-    private List<Book> books = new ArrayList<>();
-
-    // Getters and Setters
+    @ManyToMany
+    @JoinTable(
+            name = "cart_books",
+            joinColumns = @JoinColumn(name = "cart_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    private Set<Book> books = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -29,39 +27,15 @@ public class ShoppingCart {
         this.id = id;
     }
 
-    public List<Book> getBooks() {
+    public Set<Book> getBooks() {
         return books;
     }
 
-    public void setBooks(List<Book> books) {
+    public void setBooks(Set<Book> books) {
         this.books = books;
-    }
-
-    public List<Purchase> getPurchases() {
-        return purchases;
-    }
-
-    public void setPurchases(List<Purchase> purchases) {
-        this.purchases = purchases;
     }
 
     public void addBook(Book book) {
         this.books.add(book);
-    }
-
-    public void removeBook(Book book) {
-        this.books.remove(book);
-    }
-
-    public void clearCart() {
-        this.books.clear();
-    }
-
-    public void addPurchase(Purchase purchase) {
-        this.purchases.add(purchase);
-    }
-
-    public void removePurchase(Purchase purchase) {
-        this.purchases.remove(purchase);
     }
 }

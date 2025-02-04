@@ -2,41 +2,38 @@ package com.dammy.bookstoreapi.service;
 
 import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.model.ShoppingCart;
-import com.dammy.bookstoreapi.repository.CartRepository;
 import com.dammy.bookstoreapi.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class CartService {
     @Autowired
-    private CartRepository cartRepository;
+    private BookRepository bookRepository;
 
     @Autowired
-    private BookRepository bookRepository;
+    private RedisTemplate<String, ShoppingCart> redisTemplate;
 
     public ShoppingCart createCart() {
         ShoppingCart cart = new ShoppingCart();
-        return cartRepository.save(cart);
+        redisTemplate.opsForValue().set("cart:" + cart.getId(), cart);
+        return cart;
     }
 
     public ShoppingCart addBookToCart(Long cartId, Long bookId) {
-        ShoppingCart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
-
-        if (!cart.getBooks().contains(book)) {
-            cart.getBooks().add(book);
+        ShoppingCart cart = redisTemplate.opsForValue().get("cart:" + cartId);
+        if (cart == null) {
+            throw new RuntimeException("Cart not found");
         }
 
-        return cartRepository.save(cart);
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new RuntimeException("Book not found"));
+        cart.addBook(book);
+        redisTemplate.opsForValue().set("cart:" + cartId, cart);
+        return cart;
     }
 
     public ShoppingCart getCart(Long cartId) {
-        return cartRepository.findById(cartId).orElseGet(ShoppingCart::new);
+        return redisTemplate.opsForValue().get("cart:" + cartId);
     }
 }

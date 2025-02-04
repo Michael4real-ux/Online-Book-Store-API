@@ -38,6 +38,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+
     @Bean
     @Profile("dev")
     public UserDetailsService usersDev(BCryptPasswordEncoder passwordEncoder) {

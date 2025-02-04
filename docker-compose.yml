@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  bookstore:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - h2
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2:9092/~/default
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_H2_CONSOLE_ENABLED: "true"
+      SPRING_H2_CONSOLE_PATH: /h2-console
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+  h2:
+    image: oscarfonts/h2
+    ports:
+      - "9092:9092"
+    environment:
+      H2_OPTIONS: "-tcp -tcpAllowOthers -ifNotExists"

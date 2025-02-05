@@ -1,5 +1,6 @@
 package com.dammy.bookstoreapi.controller;
 
+import com.dammy.bookstoreapi.dto.BookDTO;
 import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +19,7 @@ public class BookController {
 
     @GetMapping
     @Operation(summary = "Get all books")
-    public List<Book> getAllBooks() {
+    public List<BookDTO> getAllBooks() {  // Change return type to List<BookDTO>
         return bookService.findAll();
     }
 
@@ -31,10 +32,10 @@ public class BookController {
 
     @GetMapping("/search")
     @Operation(summary = "Search books by title, author name, year, genre")
-    public List<Book> searchBooks(@RequestParam(required = false) String title,
-                                  @RequestParam(required = false) String author,
-                                  @RequestParam(required = false) Integer year,
-                                  @RequestParam(required = false) String genre) {
+    public List<BookDTO> searchBooks(@RequestParam(required = false) String title,
+                                     @RequestParam(required = false) String author,
+                                     @RequestParam(required = false) Integer year,
+                                     @RequestParam(required = false) String genre) {
         return bookService.searchBooks(title, author, year, genre);
     }
 }

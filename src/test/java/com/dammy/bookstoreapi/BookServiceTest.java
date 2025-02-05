@@ -1,5 +1,6 @@
 package com.dammy.bookstoreapi;
 
+import com.dammy.bookstoreapi.dto.BookDTO;
 import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.model.User;
 import com.dammy.bookstoreapi.repository.BookRepository;
@@ -51,7 +52,7 @@ public class BookServiceTest {
 
 		when(bookRepository.findAll()).thenReturn(List.of(book1, book2));
 
-		List<Book> books = bookService.findAll();
+		List<BookDTO> books = bookService.findAll();
 		assertEquals(2, books.size());
 		assertEquals("Book 1", books.get(0).getTitle());
 		assertEquals("Book 2", books.get(1).getTitle());
@@ -112,7 +113,7 @@ public class BookServiceTest {
 
 		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
 
-		List<Book> result = bookService.searchBooks("Book 1", null, null, null);
+		List<BookDTO> result = bookService.searchBooks("Book 1", null, null, null);
 		assertEquals(1, result.size());
 		assertEquals("Book 1", result.get(0).getTitle());
 	}
@@ -129,9 +130,10 @@ public class BookServiceTest {
 
 		when(bookRepository.findByAuthorName("Author 1")).thenReturn(List.of(book));
 
-		List<Book> result = bookService.searchBooks(null, "Author 1", null, null);
+		List<BookDTO> result = bookService.searchBooks(null, "Author 1", null, null);
 		assertEquals(1, result.size());
-		assertEquals("Author 1", result.get(0).getAuthor().getName());
+		assertEquals("Author 1", result.get(0).getAuthorName());
+
 	}
 
 
@@ -148,7 +150,7 @@ public class BookServiceTest {
 
 		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
 
-		List<Book> result = bookService.searchBooks(null, null, 2022, null);
+		List<BookDTO> result = bookService.searchBooks(null, null, 2022, null);
 		assertEquals(1, result.size());
 		assertEquals(2022, result.get(0).getPublicationYear());
 	}
@@ -170,10 +172,10 @@ public class BookServiceTest {
 		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
 		when(bookRepository.findByGenreContainingIgnoreCase("Fiction")).thenReturn(List.of(book));
 
-		List<Book> result = bookService.searchBooks("Book 1", "Author 1", 2022, "Fiction");
+		List<BookDTO> result = bookService.searchBooks("Book 1", "Author 1", 2022, "Fiction");
 		assertEquals(1, result.size());
 		assertEquals("Book 1", result.get(0).getTitle());
-		assertEquals("Author 1", result.get(0).getAuthor().getName());
+		assertEquals("Author 1", result.get(0).getAuthorName());
 		assertEquals(2022, result.get(0).getPublicationYear());
 		assertEquals("Fiction", result.get(0).getGenre());
 	}
@@ -185,7 +187,7 @@ public class BookServiceTest {
 		when(bookRepository.findByPublicationYear(anyInt())).thenReturn(new ArrayList<>());
 		when(bookRepository.findByGenreContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
 
-		List<Book> result = bookService.searchBooks("Non-existent book", "Non-existent author", 2022, "Non-existent genre");
+		List<BookDTO> result = bookService.searchBooks("Non-existent book", "Non-existent author", 2022, "Non-existent genre");
 		assertTrue(result.isEmpty());
 	}
 

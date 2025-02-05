@@ -1,24 +1,32 @@
 package com.dammy.bookstoreapi.service;
 
+import com.dammy.bookstoreapi.dto.BookDTO;
 import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.repository.BookRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
-
     private final BookRepository bookRepository;
 
     public BookService(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
 
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    public List<BookDTO> findAll() {
+        return bookRepository.findAll().stream()
+                .map(book -> new BookDTO(
+                        book.getId(),
+                        book.getTitle(),
+                        book.getGenre(),
+                        book.getIsbn(),
+                        book.getAuthor(),
+                        book.getPublicationYear()
+                ))
+                .collect(Collectors.toList());
     }
 
     public Book save(Book book) {
@@ -35,27 +43,31 @@ public class BookService {
         return bookRepository.findById(id);
     }
 
-    public List<Book> searchBooks(String title, String author, Integer year, String genre) {
-        List<Book> result = new ArrayList<>();
+    public List<BookDTO> searchBooks(String title, String author, Integer year, String genre) {
+        List<Book> books;
 
-        if (title != null && !title.isEmpty()) {
-            result.addAll(bookRepository.findByTitleContainingIgnoreCase(title));
+        if (title != null) {
+            books = bookRepository.findByTitleContainingIgnoreCase(title);
+        } else if (author != null) {
+            books = bookRepository.findByAuthorName(author);
+        } else if (year != null) {
+            books = bookRepository.findByPublicationYear(year);
+        } else if (genre != null) {
+            books = bookRepository.findByGenreContainingIgnoreCase(genre);
+        } else {
+            books = bookRepository.findAll();
         }
 
-        if (author != null && !author.isEmpty()) {
-            result.addAll(bookRepository.findByAuthorName(author));
-        }
-
-        if (year != null) {
-            result.addAll(bookRepository.findByPublicationYear(year));
-        }
-
-        if (genre != null && !genre.isEmpty()) {
-            result.addAll(bookRepository.findByGenreContainingIgnoreCase(genre));
-        }
-
-        // Return distinct books
-        return result.stream().distinct().toList();
+        return books.stream()
+                .map(book -> new BookDTO(
+                        book.getId(),
+                        book.getTitle(),
+                        book.getGenre(),
+                        book.getIsbn(),
+                        book.getAuthor(),
+                        book.getPublicationYear()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

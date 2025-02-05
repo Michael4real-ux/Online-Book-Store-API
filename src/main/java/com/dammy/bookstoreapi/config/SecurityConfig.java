@@ -24,10 +24,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/books").permitAll()
-                        .requestMatchers("/api/v1/books/**").authenticated()
-                        .requestMatchers("/api/v1/cart/**").permitAll()
-                        .requestMatchers("/api/v1/checkout/**").authenticated()
+                        .requestMatchers("/api/v1/books/**", "/api/v1/cart/**", "/api/v1/checkout/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/v1/register").permitAll()
                 )

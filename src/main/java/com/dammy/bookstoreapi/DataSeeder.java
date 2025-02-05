@@ -25,7 +25,7 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Create the "author1" user (same as before)
+
         if (userRepository.findByUsername("author1") == null) {
             User user = new User();
             user.setUsername("author1");

@@ -26,16 +26,18 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (userRepository.findByUsername("author1") == null) {
+        // Seeding for 'author1'
+        if (userRepository.findByUsername("author1").isEmpty()) {
             User user = new User();
             user.setUsername("author1");
             user.setPassword(passwordEncoder.encode("password"));
             user.setName("Author 1");
-            user.setRole("USER"); // Assign a role
+            user.setRole("USER"); // Assign a role for user
             userRepository.save(user);
         }
 
-        if (userRepository.findByUsername("admin") == null) {
+        // Seeding for 'admin'
+        if (userRepository.findByUsername("admin").isEmpty()) {
             User adminUser = new User();
             adminUser.setUsername("admin");
             adminUser.setPassword(passwordEncoder.encode("adminpass"));
@@ -44,8 +46,10 @@ public class DataSeeder implements CommandLineRunner {
             userRepository.save(adminUser);
         }
 
+        // Seeding a book for 'author1'
         if (bookRepository.findByIsbn("123-4567890123") == null) {
-            User author = userRepository.findByUsername("author1");
+            User author = userRepository.findByUsername("author1")
+                    .orElseThrow(() -> new RuntimeException("User 'author1' not found"));
             Book book = new Book();
             book.setTitle("The Great Mystery");
             book.setGenre("Mystery");
@@ -55,4 +59,5 @@ public class DataSeeder implements CommandLineRunner {
             bookRepository.save(book);
         }
     }
+
 }

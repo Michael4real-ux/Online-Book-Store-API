@@ -2,7 +2,6 @@ package com.dammy.bookstoreapi.service;
 
 import com.dammy.bookstoreapi.model.User;
 import com.dammy.bookstoreapi.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +16,7 @@ public class UserService {
     }
 
     public User register(User user) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username already taken");
         }
 
@@ -31,6 +30,7 @@ public class UserService {
     }
 
     public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

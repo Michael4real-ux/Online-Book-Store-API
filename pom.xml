@@ -62,16 +62,12 @@
 			<version>42.7.5</version>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>org.springdoc</groupId>-->
-<!--			<artifactId>springdoc-openapi-ui</artifactId>-->
-<!--			<version>1.6.9</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springdoc</groupId>-->
-<!--			<artifactId>springdoc-openapi-data-rest</artifactId>-->
-<!--			<version>1.6.9</version>-->
-<!--		</dependency>-->
+		<!-- JWT library for creating and parsing JWTs -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.12.3</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springdoc</groupId>

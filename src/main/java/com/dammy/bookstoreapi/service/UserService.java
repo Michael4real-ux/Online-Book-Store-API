@@ -8,13 +8,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public User register(User user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            throw new RuntimeException("Username already taken");
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        if (user.getRole() == null) {
+            user.setRole("USER"); // Default role if not provided
+        }
+
         return userRepository.save(user);
     }
 

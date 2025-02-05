@@ -31,18 +31,18 @@ public class DataSeeder implements CommandLineRunner {
             user.setUsername("author1");
             user.setPassword(passwordEncoder.encode("password"));
             user.setName("Author 1");
+            user.setRole("USER"); // Assign a role
             userRepository.save(user);
         }
 
-        // Create the "admin" user (NEW!)
         if (userRepository.findByUsername("admin") == null) {
             User adminUser = new User();
             adminUser.setUsername("admin");
             adminUser.setPassword(passwordEncoder.encode("adminpass"));
             adminUser.setName("Administrator");
+            adminUser.setRole("ADMIN"); // Assign the admin role
             userRepository.save(adminUser);
         }
-
 
         if (bookRepository.findByIsbn("123-4567890123") == null) {
             User author = userRepository.findByUsername("author1");

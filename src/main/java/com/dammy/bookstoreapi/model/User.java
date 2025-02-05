@@ -19,15 +19,19 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String role; // Add this field
+
     // Default constructor
     public User() {
     }
 
     // Parameterized constructor
-    public User(String username, String password, String name) {
+    public User(String username, String password, String name, String role) {
         this.username = username;
         this.password = password;
         this.name = name;
+        this.role = role;
     }
 
     // Getters and Setters
@@ -61,5 +65,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

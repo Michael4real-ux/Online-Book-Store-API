@@ -177,11 +177,14 @@ port=5432
 Password=bookstore_password
 DB: bookstore_db
 ```
+
+```
 - Redis
 Host: localhost
 port=6379
 DB: 0
 password=redis_password
+```
 
 ### Running Tests
 

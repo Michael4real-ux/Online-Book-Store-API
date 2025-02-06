@@ -1,190 +1,314 @@
 # Online Book Store API
 
 ## Overview
-This is a Restful API for managing an online bookstore. It allows users to manage books, a shopping cart, and purchase history.
+
+The Online Book Store API is a Restful service for managing books, shopping carts, and purchases. It allows users to browse books, add items to a cart, and proceed to checkout.
 
 ## Technologies Used
-- Spring Boot
-- H2 Database (in-memory)
-- Maven
 
-## Getting Started
+- Spring Boot - Backend framework for building REST APIs
+
+- PostgreSQL - Relational database for persistent data storage
+
+- Redis - In-memory data store used for caching and cart management
+
+- Docker - Containerization for easy deployment and scalability
+
+- Maven - Dependency management and build automation
+
+- JWT (JSON Web Token) - Used for secure authentication and authorization
+
+##  Why Redis for the Shopping Cart?
+
+Instead of using a traditional database table and repository for cart management, Redis is utilized for the following reasons:
+
+Performance Optimization: Redis is an in-memory store, making cart operations extremely fast.
+
+Avoiding Redundant Data: Users may add items to the cart but never complete a purchase. Storing this data in the database would be unnecessary and inefficient.
+
+Session-Based Storage: Since carts are temporary and user-driven, Redis is a better fit than persisting unconfirmed orders in a relational database.
+
+### Getting Started
 
 ### Prerequisites
-- Java 17 or later
-- Maven
+
+- Docker and Docker Compose installed on your machine.
 
 ### Running the Application
-1. Clone the repository:
-   ```bash
-   git clone <will-update-this-to-repository-url>
-   cd bookstore-api
-   
-2. Before running the application ensure you set the h2 memory database
 
-
-   Option 1: Start H2 Using Maven (Easiest), If Maven is installed, run:
+- Clone the repository:
 ```
-     mvn exec:java -Dexec.mainClass="org.h2.tools.Server" -Dexec.args="-tcp -tcpAllowOthers -tcpPort 9092 -ifNotExists"
-```
-   Option 2: Start H2 Manually from JAR, If  downloaded the H2 JAR, run:
-
-```
-     java -cp h2*.jar org.h2.tools.Server -tcp -tcpAllowOthers -tcpPort 9092 -ifNotExists
-
+git clone <will-update-this-to-repository-url>
 ```
 
-Note: Please make sure the H2 database is running continuously during testing the application
+```
+cd bookstore-api
+```
 
-3. Run/Start the application:
-  ```bash
-    mvn spring-boot:run
- ```
+- Ensure Docker is installed and running.
 
-API Endpoints
+Start the application using Docker Compose:
+
+```
+docker compose up --build
+```
+
+To stop the application:
+
+```
+docker compose stop
+```
+
+### API Endpoints
+
+Public Endpoints (No Authentication Required)
 
 Books
 
-- Retrieve all books
+- Retrieve all books: 
 ```
- GET /api/v1/books 
+GET /api/v1/books
 ```
-- Create a new book
-```
-POST /api/v1/books
-```
+
 - Search for books
 ```
-GET /api/v1/books/search 
+GET /api/v1/books/search
+```
+
+- Get cart contents: 
+```
+GET /api/v1/cart/{cartId}
+```
+Authenticated Endpoints (Requires Authentication)
+
+Authentication
+
+```
+Register a user: POST /api/v1/auth/register
+```
+```
+Login: POST /api/v1/auth/login
+```
+
+Books
+
+- Create a new book 
+
+```
+POST /api/v1/books
 ```
 
 Cart
 
-- Create a new cart
+- Add books to the cart
+
 ```
-POST /api/v1/cart
+POST /api/v1/cart/{userId}/add
 ```
-- Add a book to cart
+
+- Remove books from the cart
+
 ```
-POST /api/v1/cart/{cartId}/add 
-```
-- Get cart contents
-```
-GET /api/v1/cart/{cartId}
+POST /api/v1/cart/{userId}/remove
 ```
 
 Checkout
 
-- Simulate the checkout process
+- Checkout process: 
+
 ```
-POST /api/v1//checkout
+POST /api/v1/checkout
+
 ```
 
-Testing
-Unit tests can be found in the src/test/java directory. You can run them using:
+- Get total amount to pay: 
 
-````
+```
+GET /api/v1/checkout/total-amount
+```
+
+- Get purchase history
+
+```
+GET /api/v1/checkout/purchase/history
+```
+
+### NOTE
+Authentication Details
+
+For authenticated routes, You need to log in with the following seeded user credentials:
+
+```
+{
+"username": "author1",
+"password": "password"
+}
+
+```
+
+- Response
+```
+  {
+  "message": "Login successful",
+  "username": "author1",
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhdXRob3IxIiwiaWF0IjoxNzM4ODMzMzAwLCJleHAiOjE3Mzg4MzY5MDB9.Jpb-Y7ZBGCdZmrB_zX7-FdygrML_NzLvqZqtARf7grg"
+  }
+```
+Authentication is handled using JWT tokens. Upon successful login, the API returns an access token. The access token must be included in the Authorization header for all protected endpoints:
+Please ensure you copy it and paste in the Authorization header for testing
+
+Authorization: Bearer <your-access-token>
+
+### Api documentation
+The app is documented with swagger you can find the link below
+
+```
+
+```
+
+### Running Tests
+
+Unit tests can be found in the src/test/java directory. To run tests:
+
+```
 mvn test
-````
+```
 
-## High-Level Design for the Online Book Store API
+### High-Level Architecture
 
-Overview:
-The high-level design of this Online Book Store API is structured to separate concerns among various components, which enhances scalability and maintainability. The design follows a layered architecture, consisting of the Model, Repository, Service, and Controller layers. Below is a description of each layer along with a diagram to illustrate the relationships between components.
+The Online Book Store API follows a layered architecture:
 
-Components Description
-Models:
+Components
 
-Book: Represents a book in the inventory with attributes such as title, genre, ISBN, author, and year of publication.
-Cart: Represents a shopping cart that can hold multiple books.
-Purchase: Represents a purchase made by a user, linking to the cart and including the purchase date.
-Repositories:
+- Models:
 
-BookRepository: Handles CRUD operations for books in the database.
-CartRepository: Manages the storage and retrieval of shopping carts.
-PurchaseRepository: Handles operations related to purchase records.
-Services:
+User: Represents authenticated users.
 
-BookService: Contains business logic for managing books, including searching and saving books.
-CartService: Manages the shopping cart functionalities, such as adding books and retrieving cart contents.
-CheckoutService: Handles the checkout process, simulating a purchase transaction.
-Controllers:
+Book: Represents books in inventory.
 
-BookController: Exposes RESTful endpoints for interacting with books.
-CartController: Provides endpoints for managing shopping carts.
-CheckoutController: Offers endpoints for processing checkouts.
+Cart: Managed in Redis to optimize performance.
 
-High-Level Architecture Diagram
+Purchase: Represents a completed order.
+
+- Repositories:
+
+UserRepository: Manages user authentication and data.
+
+BookRepository: Handles book storage and retrieval.
+
+PurchaseRepository: Stores completed purchases.
+
+- Services:
+
+AuthService: Handles user authentication and authorization.
+
+BookService: Handles book-related operations.
+
+CartService: Uses Redis for cart management.
+
+CheckoutService: Manages the checkout process.
+
+- Controllers:
+
+AuthController: Manages authentication (register, login).
+
+BookController: Manages book-related endpoints.
+
+CartController: Handles cart-related operations.
+
+CheckoutController: Processes checkouts.
+
+### Architecture Flow
+
+Authentication
 
 ```
 +-------------------+            +---------------------+
-|   HTTP Requests    |  <------> |   BookController    |
+|   HTTP Requests   |  <------>  |   AuthController   |
 +-------------------+            +---------------------+
                                          |
-                                         | 
+                                         v
+                                +---------------------+
+                                |    AuthService     |
+                                +---------------------+
+                                         |
+                                         v
+                                +---------------------+
+                                |   UserRepository   |
+                                +---------------------+
+                                         |
+                                         v
+                                  +-------------+
+                                  | PostgreSQL  |
+                                  +-------------+
+```
+Books
+
+```
++-------------------+            +---------------------+
+|   HTTP Requests   |  <------>  |   BookController   |
++-------------------+            +---------------------+
+                                         |
                                          v
                                 +---------------------+
                                 |    BookService      |
                                 +---------------------+
-                                         |
                                          |
                                          v
                                 +---------------------+
                                 |   BookRepository    |
                                 +---------------------+
                                          |
-                                         |
                                          v
                                   +-------------+
-                                  |   Database  |
+                                  | PostgreSQL  |
                                   +-------------+
+```
 
+Cart
+
+```
 +-------------------+            +---------------------+
-|   HTTP Requests    |  <------> |   CartController    |
+|   HTTP Requests   |  <------>  |   CartController   |
 +-------------------+            +---------------------+
-                                         |
                                          |
                                          v
                                 +---------------------+
                                 |    CartService      |
                                 +---------------------+
                                          |
-                                         |
                                          v
                                 +---------------------+
-                                |   CartRepository    |
+                                |       Redis        |
                                 +---------------------+
+```
 
+Checkout
+
+```
 +-------------------+            +---------------------+
-|   HTTP Requests    |  <------> |  CheckoutController  |
+|   HTTP Requests   |  <------>  | CheckoutController  |
 +-------------------+            +---------------------+
-                                         |
                                          |
                                          v
                                 +---------------------+
                                 |  CheckoutService    |
                                 +---------------------+
                                          |
-                                         |
                                          v
                                 +---------------------+
-                                |   PurchaseRepository |
+                                | PurchaseRepository |
                                 +---------------------+
+                                         |
+                                         v
+                                  +-------------+
+                                  | PostgreSQL  |
+                                  +-------------+
 ```
 
-Explanation of the Diagram
+Attached to the code is an High Level design in pdf
 
-1. HTTP Requests: The clients (e.g., web or mobile apps) send HTTP requests to the RESTful API endpoints.
 
-2. Controllers: Each controller (BookController, CartController, CheckoutController) receives requests and routes them to the corresponding service layer.
+### Conclusion
 
-3. Services: Services contain the business logic and interact with the repository layer to perform operations on the data.
-
-4. Repositories: Repositories handle data access, providing methods for CRUD operations on the respective data models.
-
-5. Database: The application uses an H2 in-memory database (or any other database) to store data persistently.
-
-Conclusion
-This high-level design provides a clear understanding of how the Online Book Store API is structured. The separation of concerns among models, repositories, services, and controllers allows for easier maintenance and scalability. This architecture can be further extended to integrate additional features, such as authentication, payment processing, and caching, as needed.
-
-Note: A png file for the High-Level Architecture Diagram is attached in the repository.
+This API is designed for efficiency and scalability. The decision to use Redis for cart management helps improve performance and reduces unnecessary database writes. Authentication is managed using JWT to ensure secure access to protected resources. The application runs inside Docker containers, making it easy to deploy and manage in different environments. Future enhancements can include payment gateway integration and book recommendations.

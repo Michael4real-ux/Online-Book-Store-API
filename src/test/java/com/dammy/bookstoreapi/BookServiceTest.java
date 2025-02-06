@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -132,21 +133,17 @@ public class BookServiceTest {
 
 	@Test
 	public void testSearchBooksByTitle() {
-		User author = new User();
-		author.setId(1L);
-		author.setName("Author 1");
-
 		Book book = new Book();
-		book.setTitle("Book 1");
-		book.setAuthor(author);
+		book.setTitle("Test Book");
+		book.setPublicationYear(2023);
 
-		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
+		when(bookRepository.findAll(any(Specification.class))).thenReturn(List.of(book));
 
-		List<BookDTO> result = bookService.searchBooks("Book 1", null, null, null);
-		assertEquals(1, result.size());
-		assertEquals("Book 1", result.get(0).title());
-		assertEquals("Author 1", result.get(0).author().getName());
+		List<BookDTO> books = bookService.searchBooks("Test", null, null, null);
+		assertEquals(1, books.size()); // Ensure at least one book is found
+		assertEquals("Test Book", books.get(0).title());
 	}
+
 
 	@Test
 	public void testSearchBooksByAuthorName() {
@@ -158,7 +155,7 @@ public class BookServiceTest {
 		book.setTitle("Book 1");
 		book.setAuthor(author);
 
-		when(bookRepository.findByAuthorName("Author 1")).thenReturn(List.of(book));
+		when(bookRepository.findAll(any(Specification.class))).thenReturn(List.of(book));
 
 		List<BookDTO> result = bookService.searchBooks(null, "Author 1", null, null);
 		assertEquals(1, result.size());
@@ -176,8 +173,7 @@ public class BookServiceTest {
 		book.setAuthor(author);
 		book.setPublicationYear(2022);
 
-		// Correctly mock the repository method
-		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
+		when(bookRepository.findAll(any(Specification.class))).thenReturn(List.of(book));
 
 		List<BookDTO> result = bookService.searchBooks(null, null, 2022, null);
 		assertEquals(1, result.size());
@@ -185,6 +181,7 @@ public class BookServiceTest {
 		assertEquals("Author 1", result.get(0).author().getName());
 		assertEquals(2022, result.get(0).publicationYear());
 	}
+
 
 	@Test
 	public void testSearchBooksByMultipleCriteria() {
@@ -198,18 +195,19 @@ public class BookServiceTest {
 		book.setPublicationYear(2022);
 		book.setGenre("Fiction");
 
-		// Correctly mock the repository methods
-		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
-		when(bookRepository.findByAuthorName("Author 1")).thenReturn(List.of(book));
-		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
-		when(bookRepository.findByGenreContainingIgnoreCase("Fiction")).thenReturn(List.of(book));
+		when(bookRepository.findAll(any(Specification.class))).thenReturn(List.of(book));
 
 		List<BookDTO> result = bookService.searchBooks("Book 1", "Author 1", 2022, "Fiction");
+
+		assertNotNull(result);
 		assertEquals(1, result.size());
-		assertEquals("Book 1", result.get(0).title());
-		assertEquals("Author 1", result.get(0).author().getName());
-		assertEquals(2022, result.get(0).publicationYear());
-		assertEquals("Fiction", result.get(0).genre());
+
+		BookDTO bookDTO = result.get(0);
+		assertEquals("Book 1", bookDTO.title());
+		assertNotNull(bookDTO.author());
+		assertEquals("Author 1", bookDTO.author().getName());
+		assertEquals(2022, bookDTO.publicationYear());
+		assertEquals("Fiction", bookDTO.genre());
 	}
 
 	@Test
@@ -222,12 +220,11 @@ public class BookServiceTest {
 
 	@Test
 	public void testSearchBooksRepositoryException() {
-		when(bookRepository.findByTitleContainingIgnoreCase(anyString())).thenThrow(new RuntimeException("Repository error"));
+		when(bookRepository.findAll(any(Specification.class))).thenThrow(new RuntimeException("Database error"));
 
-		Exception exception = assertThrows(RuntimeException.class, () -> {
-			bookService.searchBooks("Book 1", null, null, null);
+		assertThrows(RuntimeException.class, () -> {
+			bookService.searchBooks(null, null, null, null);
 		});
-
-		assertEquals("Repository error", exception.getMessage());
 	}
+
 }

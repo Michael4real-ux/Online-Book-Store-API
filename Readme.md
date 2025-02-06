@@ -160,10 +160,10 @@ Please ensure you copy it and paste in the Authorization header for testing
 Authorization: Bearer <your-access-token>
 
 ### Api documentation
-The app is documented with swagger you can find the link below
+The app is documented with postman you can find the link below
 
 ```
-
+https://documenter.getpostman.com/view/17452818/2sAYX8GfvK
 ```
 
 ### Running Tests

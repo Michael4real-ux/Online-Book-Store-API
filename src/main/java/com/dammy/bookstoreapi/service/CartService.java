@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CartService {
 
@@ -33,19 +35,15 @@ public class CartService {
         redisTemplate.opsForValue().set(cartKey, cart);  // Store the cart in Redis
     }
 
-    // Add a book to the cart
-    public ShoppingCart addBookToCart(Long userId, Long bookId) {
-        logger.info("Adding book {} to cart for user {}", bookId, userId);
+    // Add books to the cart
+    public ShoppingCart addBooksToCart(Long userId, List<Long> bookIds) {
+        logger.info("Adding books to cart for user {}", userId);
         String cartKey = "cart:user:" + userId;
 
         // Check if the cart exists; if not, create it
         if (!redisTemplate.hasKey(cartKey)) {
             createCart(userId);
         }
-
-        // Fetch the book and add it to the cart
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
 
         // Retrieve the cart from Redis
         ShoppingCart cart = (ShoppingCart) redisTemplate.opsForValue().get(cartKey);
@@ -54,8 +52,14 @@ public class CartService {
             cart.setId(cartKey);
         }
 
-        // Add the book to the cart
-        cart.addBook(book);
+        // Add each book to the cart if it's not already in the cart
+        for (Long bookId : bookIds) {
+            Book book = bookRepository.findById(bookId)
+                    .orElseThrow(() -> new RuntimeException("Book not found"));
+            if (!cart.getBooks().contains(book)) {
+                cart.addBook(book);
+            }
+        }
 
         // Save the updated cart back to Redis
         redisTemplate.opsForValue().set(cartKey, cart);
@@ -74,15 +78,19 @@ public class CartService {
     }
 
     // Remove a book from the cart
-    public ShoppingCart removeBookFromCart(Long userId, Long bookId) {
+    public ShoppingCart removeBooksFromCart(Long userId, List<Long> bookIds) {
         String cartKey = "cart:user:" + userId;
+
+        // Retrieve the cart from Redis
         ShoppingCart cart = (ShoppingCart) redisTemplate.opsForValue().get(cartKey);
         if (cart == null) {
             throw new RuntimeException("Cart not found");
         }
 
-        // Remove the book from the cart
-        cart.removeBook(bookId);
+        // Remove each book from the cart
+        for (Long bookId : bookIds) {
+            cart.removeBook(bookId);
+        }
 
         // Save the updated cart back to Redis
         redisTemplate.opsForValue().set(cartKey, cart);

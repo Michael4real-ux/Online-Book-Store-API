@@ -1,6 +1,6 @@
 package com.dammy.bookstoreapi.controller;
 
-import com.dammy.bookstoreapi.dto.CheckoutRequest;
+import com.dammy.bookstoreapi.utils.CheckoutRequest;
 import com.dammy.bookstoreapi.model.Purchase;
 import com.dammy.bookstoreapi.service.CheckoutService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,8 +24,15 @@ public class CheckoutController {
     @Operation(summary = "Checkout process")
     @SecurityRequirement(name = "bearerAuth")
     public Purchase checkout(@RequestBody CheckoutRequest request) {
-        // Call the CheckoutService with the shopping cart and payment method
-        return checkoutService.checkout(request.getShoppingCart(), request.getPaymentMethod());
+        // Call the CheckoutService with the checkout request
+        return checkoutService.checkout(request);
+    }
+
+    @GetMapping("/total-amount")
+    @Operation(summary = "Total amount to pay during checkout")
+    @SecurityRequirement(name = "bearerAuth")
+    public double getTotalAmount(@RequestBody CheckoutRequest request) {
+        return checkoutService.calculateTotalAmount(request);
     }
 
     @GetMapping("/purchase/history")

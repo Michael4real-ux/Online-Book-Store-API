@@ -25,6 +25,9 @@ public class Book implements Serializable {
     @Pattern(regexp = "^[0-9-]+$", message = "ISBN must contain only numbers and dashes")
     private String isbn;
 
+    private double price;
+
+
     @ManyToOne
     @JoinColumn(name = "author_id")
     private User author;
@@ -81,6 +84,14 @@ public class Book implements Serializable {
 
     public void setPublicationYear(int publicationYear) {
         this.publicationYear = publicationYear;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     @Override

@@ -63,10 +63,10 @@ public class BookServiceTest {
 
 		List<BookDTO> books = bookService.findAll();
 		assertEquals(2, books.size());
-		assertEquals("Book 1", books.get(0).getTitle());
-		assertEquals("Author 1", books.get(0).getAuthor().getName());
-		assertEquals("Book 2", books.get(1).getTitle());
-		assertEquals("Author 2", books.get(1).getAuthor().getName());
+		assertEquals("Book 1", books.get(0).title());
+		assertEquals("Author 1", books.get(0).author().getName());
+		assertEquals("Book 2", books.get(1).title());
+		assertEquals("Author 2", books.get(1).author().getName());
 	}
 
 	@Test
@@ -95,9 +95,9 @@ public class BookServiceTest {
 
 			BookDTO savedBookDTO = bookService.save(book);
 
-			assertEquals("Book 1", savedBookDTO.getTitle());
-			assertEquals("Author 1", savedBookDTO.getAuthor().getName());
-			assertEquals(2022, savedBookDTO.getPublicationYear());
+			assertEquals("Book 1", savedBookDTO.title());
+			assertEquals("Author 1", savedBookDTO.author().getName());
+			assertEquals(2022, savedBookDTO.publicationYear());
 
 			verify(userRepository, times(1)).findByUsername("testUser");
 			verify(bookRepository, times(1)).save(any(Book.class));
@@ -144,8 +144,8 @@ public class BookServiceTest {
 
 		List<BookDTO> result = bookService.searchBooks("Book 1", null, null, null);
 		assertEquals(1, result.size());
-		assertEquals("Book 1", result.get(0).getTitle());
-		assertEquals("Author 1", result.get(0).getAuthor().getName());
+		assertEquals("Book 1", result.get(0).title());
+		assertEquals("Author 1", result.get(0).author().getName());
 	}
 
 	@Test
@@ -162,7 +162,7 @@ public class BookServiceTest {
 
 		List<BookDTO> result = bookService.searchBooks(null, "Author 1", null, null);
 		assertEquals(1, result.size());
-		assertEquals("Author 1", result.get(0).getAuthor().getName());
+		assertEquals("Author 1", result.get(0).author().getName());
 	}
 
 	@Test
@@ -181,9 +181,9 @@ public class BookServiceTest {
 
 		List<BookDTO> result = bookService.searchBooks(null, null, 2022, null);
 		assertEquals(1, result.size());
-		assertEquals("Book 1", result.get(0).getTitle());
-		assertEquals("Author 1", result.get(0).getAuthor().getName());
-		assertEquals(2022, result.get(0).getPublicationYear());
+		assertEquals("Book 1", result.get(0).title());
+		assertEquals("Author 1", result.get(0).author().getName());
+		assertEquals(2022, result.get(0).publicationYear());
 	}
 
 	@Test
@@ -206,10 +206,10 @@ public class BookServiceTest {
 
 		List<BookDTO> result = bookService.searchBooks("Book 1", "Author 1", 2022, "Fiction");
 		assertEquals(1, result.size());
-		assertEquals("Book 1", result.get(0).getTitle());
-		assertEquals("Author 1", result.get(0).getAuthor().getName());
-		assertEquals(2022, result.get(0).getPublicationYear());
-		assertEquals("Fiction", result.get(0).getGenre());
+		assertEquals("Book 1", result.get(0).title());
+		assertEquals("Author 1", result.get(0).author().getName());
+		assertEquals(2022, result.get(0).publicationYear());
+		assertEquals("Fiction", result.get(0).genre());
 	}
 
 	@Test

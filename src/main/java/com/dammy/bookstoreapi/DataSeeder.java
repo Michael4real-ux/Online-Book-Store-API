@@ -56,6 +56,7 @@ public class DataSeeder implements CommandLineRunner {
             book.setIsbn("123-4567890123");
             book.setAuthor(author);
             book.setPublicationYear(2021);
+            book.setPrice(45.0);
             bookRepository.save(book);
         }
     }

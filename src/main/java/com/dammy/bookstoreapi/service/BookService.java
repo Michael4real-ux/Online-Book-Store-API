@@ -36,7 +36,8 @@ public class BookService {
                         book.getGenre(),
                         book.getIsbn(),
                         convertToUserDTO(book.getAuthor()),
-                        book.getPublicationYear()
+                        book.getPublicationYear(),
+                        book.getPrice()
                 ))
                 .collect(Collectors.toList());
     }
@@ -90,7 +91,8 @@ public class BookService {
                 savedBook.getGenre(),
                 savedBook.getIsbn(),
                 convertToUserDTO(book.getAuthor()),
-                savedBook.getPublicationYear()
+                savedBook.getPublicationYear(),
+                book.getPrice()
         );
     }
 
@@ -130,7 +132,8 @@ public class BookService {
                         book.getGenre(),
                         book.getIsbn(),
                         convertToUserDTO(book.getAuthor()),
-                        book.getPublicationYear()
+                        book.getPublicationYear(),
+                        book.getPrice()
                 ))
                 .collect(Collectors.toList());
     }

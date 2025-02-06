@@ -19,8 +19,9 @@ public class Purchase {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    // Getters and Setters
+    private double totalAmount;
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -51,5 +52,13 @@ public class Purchase {
 
     public void setPaymentMethod(PaymentMethod paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }

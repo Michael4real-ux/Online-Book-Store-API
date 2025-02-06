@@ -1,10 +1,14 @@
-package com.dammy.bookstoreapi.dto;
+package com.dammy.bookstoreapi.utils;
 
 import com.dammy.bookstoreapi.model.PaymentMethod;
 import com.dammy.bookstoreapi.model.ShoppingCart;
+import jakarta.validation.constraints.NotBlank;
 
 public class CheckoutRequest {
     private ShoppingCart shoppingCart;
+
+
+    @NotBlank(message = "Payment method is required")
     private PaymentMethod paymentMethod;
 
     // Getters and Setters

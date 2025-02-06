@@ -1,8 +1,11 @@
 package com.dammy.bookstoreapi.service;
 
+import com.dammy.bookstoreapi.dto.BookDTO;
+import com.dammy.bookstoreapi.dto.UserDTO;
 import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.model.ShoppingCart;
 import com.dammy.bookstoreapi.repository.BookRepository;
+import com.dammy.bookstoreapi.utils.BookQuantity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +39,7 @@ public class CartService {
     }
 
     // Add books to the cart
-    public ShoppingCart addBooksToCart(Long userId, List<Long> bookIds) {
+    public ShoppingCart addBooksToCart(Long userId, List<BookQuantity> bookQuantities) {
         logger.info("Adding books to cart for user {}", userId);
         String cartKey = "cart:user:" + userId;
 
@@ -48,17 +51,29 @@ public class CartService {
         // Retrieve the cart from Redis
         ShoppingCart cart = (ShoppingCart) redisTemplate.opsForValue().get(cartKey);
         if (cart == null) {
-            cart = new ShoppingCart();
-            cart.setId(cartKey);
+            cart = new ShoppingCart(cartKey, userId);
         }
 
-        // Add each book to the cart if it's not already in the cart
-        for (Long bookId : bookIds) {
-            Book book = bookRepository.findById(bookId)
+        // Add each book to the cart
+        for (BookQuantity bookQuantity : bookQuantities) {
+            Book book = bookRepository.findById(bookQuantity.getBookId())
                     .orElseThrow(() -> new RuntimeException("Book not found"));
-            if (!cart.getBooks().contains(book)) {
-                cart.addBook(book);
-            }
+            BookDTO bookDTO = new BookDTO(
+                    book.getId(),
+                    book.getTitle(),
+                    book.getGenre(),
+                    book.getIsbn(),
+                    new UserDTO(
+                            book.getAuthor().getId(),
+                            book.getAuthor().getUsername(),
+                            book.getAuthor().getName(),
+                            book.getAuthor().getRole()
+                    ),
+                    book.getPublicationYear(),
+                    book.getPrice()
+            );
+            int quantity = bookQuantity.getQuantity() != null ? bookQuantity.getQuantity() : 1;
+            cart.addBook(bookDTO, quantity);
         }
 
         // Save the updated cart back to Redis
@@ -89,7 +104,23 @@ public class CartService {
 
         // Remove each book from the cart
         for (Long bookId : bookIds) {
-            cart.removeBook(bookId);
+            Book book = bookRepository.findById(bookId)
+                    .orElseThrow(() -> new RuntimeException("Book not found"));
+            BookDTO bookDTO = new BookDTO(
+                    book.getId(),
+                    book.getTitle(),
+                    book.getGenre(),
+                    book.getIsbn(),
+                    new UserDTO(
+                            book.getAuthor().getId(),
+                            book.getAuthor().getUsername(),
+                            book.getAuthor().getName(),
+                            book.getAuthor().getRole()
+                    ),
+                    book.getPublicationYear(),
+                    book.getPrice()
+            );
+            cart.removeBook(bookDTO);
         }
 
         // Save the updated cart back to Redis

@@ -1,9 +1,11 @@
 package com.dammy.bookstoreapi.config;
 
 import com.dammy.bookstoreapi.security.JwtTokenFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,6 +40,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/books", "/api/v1/books/search/**", "/api/v1/cart/**").permitAll()
                         .requestMatchers("/api/v1/books/**", "/api/v1/cart/**", "/api/v1/checkout/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                )
+                .exceptionHandling((exceptions) -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"You are not authorized to access this resource, kindly login\"}");
+                        })
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 

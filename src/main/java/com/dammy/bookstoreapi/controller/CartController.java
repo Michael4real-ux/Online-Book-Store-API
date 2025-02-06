@@ -2,6 +2,8 @@ package com.dammy.bookstoreapi.controller;
 
 import com.dammy.bookstoreapi.model.ShoppingCart;
 import com.dammy.bookstoreapi.service.CartService;
+import com.dammy.bookstoreapi.utils.BookIdsRequest;
+import com.dammy.bookstoreapi.utils.BookQuantity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,8 +23,8 @@ public class CartController {
     @Operation(summary = "Add books to cart")
     @SecurityRequirement(name = "bearerAuth")
     public ShoppingCart addBooksToCart(@PathVariable Long userId, @RequestBody BookIdsRequest request) {
-        List<Long> bookIds = request.getBookIds();
-        return cartService.addBooksToCart(userId, bookIds);
+        List<BookQuantity> bookQuantities = request.getBookQuantities();
+        return cartService.addBooksToCart(userId, bookQuantities);
     }
 
     @PostMapping("/{userId}/remove")
@@ -40,17 +42,4 @@ public class CartController {
         Long userId = Long.parseLong(parts[2]);
         return cartService.getCart(userId);
     }
-
-    public static class BookIdsRequest {
-        private List<Long> bookIds;
-
-        public List<Long> getBookIds() {
-            return bookIds;
-        }
-
-        public void setBookIds(List<Long> bookIds) {
-            this.bookIds = bookIds;
-        }
-    }
-
 }

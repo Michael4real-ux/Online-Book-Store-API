@@ -1,14 +1,12 @@
 package com.dammy.bookstoreapi.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "book")
-public class Book {
+public class Book implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,13 +28,12 @@ public class Book {
     @JoinColumn(name = "author_id")
     private User author;
 
-    @Min(1450)  // Assuming Range from year 1450 to current year 2025
+    @Min(1450)
     @Max(2025)
     @Column(name = "publication_year")
     private int publicationYear;
 
     // Getters and Setters
-
     public Long getId() {
         return id;
     }

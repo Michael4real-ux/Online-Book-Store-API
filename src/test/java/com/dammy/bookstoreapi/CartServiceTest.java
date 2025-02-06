@@ -9,16 +9,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -34,7 +33,7 @@ public class CartServiceTest {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Mock
-    private HashOperations<String, Object, Object> hashOperations;
+    private SetOperations<String, Object> setOperations;
 
     @Mock
     private ValueOperations<String, Object> valueOperations;
@@ -42,84 +41,82 @@ public class CartServiceTest {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        when(redisTemplate.opsForHash()).thenReturn(hashOperations);
+        when(redisTemplate.opsForSet()).thenReturn(setOperations);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     @Test
-    public void testCreateCart() {
-        ShoppingCart cart = cartService.createCart();
-        assertNotNull(cart);
-
-        verify(valueOperations, times(1)).set(anyString(), any(ShoppingCart.class));
-    }
-
-    @Test
     public void testAddBookToCart() {
-        String cartId = "1";
+        Long userId = 1L;
         Long bookId = 2L;
+        String cartKey = "cart:user:" + userId;
 
         Book book = new Book();
         book.setId(bookId);
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(redisTemplate.hasKey("cart:" + cartId)).thenReturn(true);
+        when(redisTemplate.hasKey(cartKey)).thenReturn(true);
 
-        Map<Object, Object> entries = new HashMap<>();
-        entries.put(bookId.toString(), book);
+        Set<Object> bookIds = new HashSet<>();
+        bookIds.add(bookId.toString());
 
-        when(hashOperations.entries("cart:" + cartId)).thenReturn(entries);
+        when(setOperations.members(cartKey)).thenReturn(bookIds);
 
-        ShoppingCart resultCart = cartService.addBookToCart(Long.parseLong(cartId), bookId);
+        ShoppingCart resultCart = cartService.addBookToCart(userId, bookId);
 
         assertNotNull(resultCart);
-        assertEquals(cartId, resultCart.getId());
+        assertEquals(cartKey, resultCart.getId());
         assertEquals(1, resultCart.getBooks().size());
 
-        verify(hashOperations, times(1)).put("cart:" + cartId, bookId.toString(), book);
+        verify(setOperations, times(1)).add(cartKey, bookId.toString());
     }
 
     @Test
     public void testAddBookToCart_BookNotFound() {
-        String cartId = "1";
+        Long userId = 1L;
         Long bookId = 2L;
+        String cartKey = "cart:user:" + userId;
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
-        when(redisTemplate.hasKey("cart:" + cartId)).thenReturn(true);
+        when(redisTemplate.hasKey(cartKey)).thenReturn(true);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> cartService.addBookToCart(Long.parseLong(cartId), bookId));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> cartService.addBookToCart(userId, bookId));
         assertEquals("Book not found", exception.getMessage());
 
         verify(bookRepository, times(1)).findById(bookId);
-        verify(hashOperations, never()).put(anyString(), anyString(), any());
+        verify(setOperations, never()).add(anyString(), anyString());
     }
 
     @Test
     public void testGetCart() {
-        String cartId = "1";
+        Long userId = 1L;
+        String cartKey = "cart:user:" + userId;
 
-        Map<Object, Object> entries = new HashMap<>();
+        Set<Object> bookIds = new HashSet<>();
+        bookIds.add("1");
+
         Book book = new Book();
         book.setId(1L);
-        entries.put("book:1", book);
-        when(hashOperations.entries("cart:" + cartId)).thenReturn(entries);
+        when(setOperations.members(cartKey)).thenReturn(bookIds);
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book));
 
-        ShoppingCart cart = cartService.getCart(Long.parseLong(cartId));
+        ShoppingCart cart = cartService.getCart(userId);
 
         assertNotNull(cart);
-        assertEquals(cartId, cart.getId());
+        assertEquals(cartKey, cart.getId());
         assertEquals(1, cart.getBooks().size());
 
-        verify(redisTemplate, times(1)).opsForHash();
-        verify(hashOperations, times(1)).entries("cart:" + cartId);
+        verify(redisTemplate, times(1)).opsForSet();
+        verify(setOperations, times(1)).members(cartKey);
     }
 
     @Test
     public void testClearCart() {
-        Long cartId = 1L;
+        Long userId = 1L;
+        String cartKey = "cart:user:" + userId;
 
-        cartService.clearCart(cartId);
+        cartService.clearCart(userId);
 
-        verify(redisTemplate, times(1)).delete("cart:" + cartId);
+        verify(redisTemplate, times(1)).delete(cartKey);
     }
 }

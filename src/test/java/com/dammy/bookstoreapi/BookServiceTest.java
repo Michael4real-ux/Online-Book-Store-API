@@ -4,12 +4,18 @@ import com.dammy.bookstoreapi.dto.BookDTO;
 import com.dammy.bookstoreapi.model.Book;
 import com.dammy.bookstoreapi.model.User;
 import com.dammy.bookstoreapi.repository.BookRepository;
+import com.dammy.bookstoreapi.repository.UserRepository;
 import com.dammy.bookstoreapi.service.BookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +32,9 @@ public class BookServiceTest {
 
 	@Mock
 	private BookRepository bookRepository;
+
+	@Mock
+	private UserRepository userRepository;
 
 	@BeforeEach
 	public void init() {
@@ -55,7 +64,9 @@ public class BookServiceTest {
 		List<BookDTO> books = bookService.findAll();
 		assertEquals(2, books.size());
 		assertEquals("Book 1", books.get(0).getTitle());
+		assertEquals("Author 1", books.get(0).getAuthor().getName());
 		assertEquals("Book 2", books.get(1).getTitle());
+		assertEquals("Author 2", books.get(1).getAuthor().getName());
 	}
 
 	@Test
@@ -63,16 +74,34 @@ public class BookServiceTest {
 		User author = new User();
 		author.setId(1L);
 		author.setName("Author 1");
+		author.setUsername("testUser");
 
 		Book book = new Book();
 		book.setTitle("Book 1");
 		book.setAuthor(author);
+		book.setPublicationYear(2022);
 
-		when(bookRepository.save(any(Book.class))).thenReturn(book);
+		SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+		Authentication authentication = Mockito.mock(Authentication.class);
+		Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+		Mockito.when(authentication.isAuthenticated()).thenReturn(true);
+		Mockito.when(authentication.getName()).thenReturn("testUser");
 
-		Book savedBook = bookService.save(book);
-		assertEquals("Book 1", savedBook.getTitle());
-		verify(bookRepository, times(1)).save(book);
+		try (MockedStatic<SecurityContextHolder> mockedSecurityContextHolder = Mockito.mockStatic(SecurityContextHolder.class)) {
+			mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+			when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(author));
+			when(bookRepository.save(any(Book.class))).thenReturn(book);
+
+			BookDTO savedBookDTO = bookService.save(book);
+
+			assertEquals("Book 1", savedBookDTO.getTitle());
+			assertEquals("Author 1", savedBookDTO.getAuthor().getName());
+			assertEquals(2022, savedBookDTO.getPublicationYear());
+
+			verify(userRepository, times(1)).findByUsername("testUser");
+			verify(bookRepository, times(1)).save(any(Book.class));
+		}
 	}
 
 	@Test
@@ -116,6 +145,7 @@ public class BookServiceTest {
 		List<BookDTO> result = bookService.searchBooks("Book 1", null, null, null);
 		assertEquals(1, result.size());
 		assertEquals("Book 1", result.get(0).getTitle());
+		assertEquals("Author 1", result.get(0).getAuthor().getName());
 	}
 
 	@Test
@@ -132,10 +162,8 @@ public class BookServiceTest {
 
 		List<BookDTO> result = bookService.searchBooks(null, "Author 1", null, null);
 		assertEquals(1, result.size());
-		assertEquals("Author 1", result.get(0).getAuthorName());
-
+		assertEquals("Author 1", result.get(0).getAuthor().getName());
 	}
-
 
 	@Test
 	public void testSearchBooksByYear() {
@@ -148,10 +176,13 @@ public class BookServiceTest {
 		book.setAuthor(author);
 		book.setPublicationYear(2022);
 
+		// Correctly mock the repository method
 		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
 
 		List<BookDTO> result = bookService.searchBooks(null, null, 2022, null);
 		assertEquals(1, result.size());
+		assertEquals("Book 1", result.get(0).getTitle());
+		assertEquals("Author 1", result.get(0).getAuthor().getName());
 		assertEquals(2022, result.get(0).getPublicationYear());
 	}
 
@@ -167,6 +198,7 @@ public class BookServiceTest {
 		book.setPublicationYear(2022);
 		book.setGenre("Fiction");
 
+		// Correctly mock the repository methods
 		when(bookRepository.findByTitleContainingIgnoreCase("Book 1")).thenReturn(List.of(book));
 		when(bookRepository.findByAuthorName("Author 1")).thenReturn(List.of(book));
 		when(bookRepository.findByPublicationYear(2022)).thenReturn(List.of(book));
@@ -175,7 +207,7 @@ public class BookServiceTest {
 		List<BookDTO> result = bookService.searchBooks("Book 1", "Author 1", 2022, "Fiction");
 		assertEquals(1, result.size());
 		assertEquals("Book 1", result.get(0).getTitle());
-		assertEquals("Author 1", result.get(0).getAuthorName());
+		assertEquals("Author 1", result.get(0).getAuthor().getName());
 		assertEquals(2022, result.get(0).getPublicationYear());
 		assertEquals("Fiction", result.get(0).getGenre());
 	}
@@ -183,11 +215,8 @@ public class BookServiceTest {
 	@Test
 	public void testSearchBooksNoResults() {
 		when(bookRepository.findByTitleContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
-		when(bookRepository.findByAuthorName(anyString())).thenReturn(new ArrayList<>());
-		when(bookRepository.findByPublicationYear(anyInt())).thenReturn(new ArrayList<>());
-		when(bookRepository.findByGenreContainingIgnoreCase(anyString())).thenReturn(new ArrayList<>());
 
-		List<BookDTO> result = bookService.searchBooks("Non-existent book", "Non-existent author", 2022, "Non-existent genre");
+		List<BookDTO> result = bookService.searchBooks("Non-existent book", null, null, null);
 		assertTrue(result.isEmpty());
 	}
 

@@ -19,16 +19,17 @@ public class BookController {
 
     @GetMapping
     @Operation(summary = "Get all books")
-    public List<BookDTO> getAllBooks() {  // Change return type to List<BookDTO>
+    public List<BookDTO> getAllBooks() {
         return bookService.findAll();
     }
 
     @PostMapping
     @Operation(summary = "Create a new book")
     @SecurityRequirement(name = "bearerAuth")
-    public Book createBook(@RequestBody Book book) {
+    public BookDTO createBook(@RequestBody Book book) {
         return bookService.save(book);
     }
+
 
     @GetMapping("/search")
     @Operation(summary = "Search books by title, author name, year, genre")

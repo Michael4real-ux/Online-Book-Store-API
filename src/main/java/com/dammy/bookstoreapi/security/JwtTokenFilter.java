@@ -32,9 +32,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         String token = jwtTokenProvider.resolveToken(request);
 
+        if (token != null) {
+            System.out.println("Token extracted: " + token);  // Log the token to check
+        }
+
         if (token != null && jwtTokenProvider.validateToken(token)) {
             try {
-                Jws<Claims> jws = Jwts.parser().setSigningKey(jwtTokenProvider.secretKey).build().parseClaimsJws(token); // Get Jws<Claims>
+                Jws<Claims> jws = Jwts.parser().setSigningKey(jwtTokenProvider.secretKey).build().parseClaimsJws(token);
                 Claims claims = jws.getBody();
                 String username = claims.getSubject();
 
@@ -55,4 +59,5 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 }

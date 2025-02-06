@@ -308,6 +308,7 @@ Checkout
 
 Attached to the code is an High Level design in pdf
 
+![High-Level-Design png](https://github.com/user-attachments/assets/bf093afb-9ecb-4fc2-ae77-93f813953bff)
 
 ### Conclusion
 

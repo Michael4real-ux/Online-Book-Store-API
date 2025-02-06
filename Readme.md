@@ -72,7 +72,7 @@ GET /api/v1/books
 
 - Search for books
 ```
-GET /api/v1/books/search
+GET /api/v1/books/search?genre=Poetry
 ```
 
 - Get cart contents: 
@@ -83,11 +83,13 @@ Authenticated Endpoints (Requires Authentication)
 
 Authentication
 
+- Register a user
 ```
-Register a user: POST /api/v1/auth/register
+POST /api/v1/auth/register
 ```
+- Login
 ```
-Login: POST /api/v1/auth/login
+ POST /api/v1/auth/login
 ```
 
 Books

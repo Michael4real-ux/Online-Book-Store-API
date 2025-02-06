@@ -166,6 +166,23 @@ The app is documented with postman you can find the link below
 https://documenter.getpostman.com/view/17452818/2sAYX8GfvK
 ```
 
+### Note: The user data is seeded when you spin the app, userId is 1 by default.
+
+### You can use the following credential on a gui
+```
+- Postgres
+Host: localhost
+Username=bookstore_user
+port=5432
+Password=bookstore_password
+DB: bookstore_db
+```
+- Redis
+Host: localhost
+port=6379
+DB: 0
+password=redis_password
+
 ### Running Tests
 
 Unit tests can be found in the src/test/java directory. To run tests:

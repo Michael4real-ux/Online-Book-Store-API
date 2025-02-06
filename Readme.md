@@ -38,7 +38,7 @@ Session-Based Storage: Since carts are temporary and user-driven, Redis is a bet
 
 - Clone the repository:
 ```
-git clone <will-update-this-to-repository-url>
+git clone https://github.com/Michael4real-ux/Online-Book-Store-API.git
 ```
 
 ```

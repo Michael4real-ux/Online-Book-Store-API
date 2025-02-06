@@ -3,6 +3,7 @@ package com.dammy.bookstoreapi.controller;
 import com.dammy.bookstoreapi.model.User;
 import com.dammy.bookstoreapi.repository.UserRepository;
 import com.dammy.bookstoreapi.security.JwtTokenProvider;
+import com.dammy.bookstoreapi.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -30,11 +31,11 @@ public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider; // Inject JwtTokenProvider
 
-    public AuthController(UserRepository userRepository,
+    public AuthController(UserService userService,
                           AuthenticationManager authenticationManager,
                           BCryptPasswordEncoder passwordEncoder,
                           JwtTokenProvider jwtTokenProvider) { // Add JwtTokenProvider
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider; // Initialize it
@@ -43,13 +44,12 @@ public class AuthController {
     // REGISTER USER
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+        if (userService.findByUsername(user.getUsername()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "Username is already taken"));
         }
 
-        // Save user after password encoding
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+        // Register user using the UserService
+        userService.register(user);
 
         return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
@@ -58,6 +58,15 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         try {
             logger.debug("Attempting login for user: {}", user.getUsername());
+
+            User existingUser = userService.findByUsername(user.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "Invalid username or password"));
+            }
+
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
@@ -84,6 +93,5 @@ public class AuthController {
                     .body(Map.of("message", "An unexpected error occurred.", "status", 500));
         }
     }
-
 
 }

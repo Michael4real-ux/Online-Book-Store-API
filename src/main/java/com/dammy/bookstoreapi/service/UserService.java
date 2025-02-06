@@ -5,6 +5,8 @@ import com.dammy.bookstoreapi.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -29,8 +31,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }

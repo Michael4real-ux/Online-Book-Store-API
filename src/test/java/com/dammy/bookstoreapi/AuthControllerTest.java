@@ -94,32 +94,6 @@ public class AuthControllerTest {
         verify(userService, never()).register(any(User.class));
     }
 
-
-//    @Test
-//    public void testLoginUser() throws Exception {
-//        // Arrange
-//        User user = new User("username", "password", "name", "role");
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//
-//        when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-//
-//        Map<String, String> credentials = new HashMap<>();
-//        credentials.put("username", user.getUsername());
-//        credentials.put("password", "password"); // Note the change here
-//
-//        when(passwordEncoder.matches("password", user.getPassword())).thenReturn(true);
-//
-//        // Act
-//        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(credentials)))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//
-//        // Assert
-//        verify(jwtTokenProvider, times(1)).createToken(any(String.class));
-//    }
-
     @Test
     public void testLoginUser_InvalidCredentials() throws Exception {
         // Arrange

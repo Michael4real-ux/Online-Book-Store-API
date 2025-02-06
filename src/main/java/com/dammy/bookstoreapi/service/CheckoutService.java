@@ -6,6 +6,7 @@ import com.dammy.bookstoreapi.model.Purchase;
 import com.dammy.bookstoreapi.model.ShoppingCart;
 import com.dammy.bookstoreapi.repository.PurchaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -16,6 +17,9 @@ public class CheckoutService {
 
     @Autowired
     private PurchaseRepository purchaseRepository;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     public double calculateTotalAmount(CheckoutRequest request) {
         ShoppingCart shoppingCart = request.getShoppingCart();
@@ -48,12 +52,22 @@ public class CheckoutService {
         purchase.setPaymentMethod(paymentMethod);
         purchase.setTotalAmount(totalAmount);
 
+        // Clear the cart after successful purchase
+        clearCart(shoppingCart.getUserId());
+
         return purchaseRepository.save(purchase);
+    }
+
+    // Clear the cart
+    public void clearCart(Long userId) {
+        String cartKey = "cart:user:" + userId;
+        redisTemplate.delete(cartKey);
     }
 
     private boolean simulatePayment(PaymentMethod paymentMethod, double amount) {
         // Simulating payment process (e.g., call a payment gateway API)
-        // For demonstration purposes,I will assume payment is always successful
+        // For demonstration purposes,I will assume payment is always successful since no webhook call tells if payment
+        // successful
         return true;
     }
 

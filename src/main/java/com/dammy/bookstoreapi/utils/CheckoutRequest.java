@@ -2,13 +2,14 @@ package com.dammy.bookstoreapi.utils;
 
 import com.dammy.bookstoreapi.model.PaymentMethod;
 import com.dammy.bookstoreapi.model.ShoppingCart;
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 public class CheckoutRequest {
     private ShoppingCart shoppingCart;
 
 
-    @NotBlank(message = "Payment method is required")
+
+    @JsonDeserialize(using = PaymentMethodDeserializer.class)
     private PaymentMethod paymentMethod;
 
     // Getters and Setters
